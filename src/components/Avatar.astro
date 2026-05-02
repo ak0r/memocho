@@ -1,0 +1,19 @@
+---
+import { siteConfig } from "@/site.config";
+
+interface Props {
+  src?: string;       // override siteConfig.avatar if needed
+  alt?: string;
+}
+
+const {
+  src = siteConfig.avatar,
+  alt = siteConfig.title,
+} = Astro.props;
+---
+
+{src && (
+  <div class="avatar">
+    <img src={src} alt={alt} class="avatar-img" />
+  </div>
+)}

@@ -1,0 +1,69 @@
+/*
+ * kami-sumi / 紙墨
+ * Tailwind CSS v4 theme + base styles + components
+ *
+ * Import order in global.css:
+ *   @import "tailwindcss";
+ *   @import "./tokens.css";
+ *   @import "./kami-sumi.css";
+ *
+ * tailwindcss first so @theme, @layer base, @layer components
+ * have the Tailwind cascade to extend into.
+ * tokens.css before this file so --ks-* primitives resolve.
+ */
+ 
+ 
+/* ============================================================
+   TAILWIND THEME
+   Exposes semantic tokens as Tailwind utilities.
+   Naming follows tokens.css — paper/ink/brand vocabulary.
+ 
+   Usage examples:
+     bg-paper          text-ink          border-border
+     bg-elevated       text-ink-secondary border-border-subtle
+     bg-interactive    text-ink-faded    text-brand
+     text-interactive-ink               bg-brand
+   ============================================================ */
+ 
+@theme inline {
+ 
+  /* --- Surfaces --- */
+  --color-paper:           var(--color-paper);
+  --color-elevated:        var(--color-elevated);
+  --color-interactive:     var(--color-interactive);
+ 
+  /* --- Text --- */
+  --color-ink:             var(--color-ink);
+  --color-ink-secondary:   var(--color-ink-secondary);
+  --color-ink-faded:       var(--color-ink-faded);
+  --color-interactive-ink: var(--color-interactive-ink);
+ 
+  /* --- Brand --- */
+  --color-brand:           var(--color-brand);
+  --color-brand-secondary: var(--color-brand-secondary);
+ 
+  /* --- Borders --- */
+  --color-border:          var(--color-border);
+  --color-border-subtle:   var(--color-border-subtle);
+  --color-ring:            var(--color-ring);
+ 
+  /* --- State --- */
+  --color-error:           var(--color-error);
+ 
+  /* --- Raw primitives — escape hatch for one-offs --- */
+  --color-ks-parchment:    var(--ks-parchment);
+  --color-ks-ivory:        var(--ks-ivory);
+  --color-ks-warm-sand:    var(--ks-warm-sand);
+  --color-ks-brand:        var(--ks-brand);
+  --color-ks-brand-light:  var(--ks-brand-light);
+  --color-ks-near-black:   var(--ks-near-black);
+  --color-ks-charcoal:     var(--ks-charcoal);
+  --color-ks-olive:        var(--ks-olive);
+  --color-ks-stone:        var(--ks-stone);
+  --color-ks-error:        var(--ks-error);
+ 
+  /* --- Fonts --- */
+  --font-serif:    var(--ks-font-serif);
+  --font-sans:     var(--ks-font-sans);
+  --font-mono:     var(--ks-font-mono); 
+}
