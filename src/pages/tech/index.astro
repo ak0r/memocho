@@ -1,0 +1,46 @@
+---
+/**
+ * /tech
+ *
+ * All tech posts with client-side filtering.
+ * Filter dimensions: tag
+ * URL state: /tech/?tag=homelab
+ *
+ * Year groupings are rendered at build time.
+ * The filter script hides individual items but also hides year headings
+ * when all posts in that year are filtered out.
+ */
+
+import { siteConfig } from "@/site.config";
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { getTechPosts, getTechTags } from "@/utils/content.utils";
+import PostList from "@/components/PostList.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import PostFilter from "@/components/PostFilter.astro";
+
+const allPosts = await getTechPosts();
+const allTags = await getTechTags();
+---
+<BaseLayout>
+	<PageHeader title="Tech Notes" subheading="Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way."/>
+	
+	{allPosts.length > 0 ? (
+		<>
+			<PostFilter 
+				listId="tech-list"
+				tags={allTags}
+			/>
+
+			<PostList 
+				publishedPosts={allPosts} 
+				showGrouped
+				enableFilter
+			/>
+		</>
+	) : (
+		<p class="my-8 text-base text-fig font-mono">
+			No published posts
+		</p>
+	)}
+	
+</BaseLayout>

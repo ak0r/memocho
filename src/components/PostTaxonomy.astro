@@ -1,0 +1,37 @@
+---
+import Icon from '@/components/Icon.astro';
+interface Props {
+  tags?: string[];
+}
+
+const { tags = [] } = Astro.props;
+---
+
+{tags.length > 0 && (
+  <section class="post-taxonomy mt-2 py-4">
+
+    <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm font-mono ">
+
+      <span class="text-muted">
+        <Icon aria-hidden="true" name="tag" size={13} /> 
+      </span>
+
+      {tags.map((tag, index) => (
+        <>
+          <a
+            href={`/tags/${tag.toLowerCase()}`}
+            class="hover:text-brand transition-colors"
+          >
+            #{tag}
+          </a>
+
+          {index < tags.length - 1 && (
+            <span class="opacity-50" aria-hidden="true">·</span>
+          )}
+        </>
+      ))}
+
+    </div>
+
+  </section>
+)}

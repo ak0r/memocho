@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./tokens.css";
 @import "./theme.css";
+@import "./typography.css";
 @import "./components.css";
 
 /* ============================================================
@@ -9,6 +10,7 @@
 
 @layer base {
   body {
-    @apply bg-paper text-ink;
+    @apply bg-page text-content;
+    font-family: var(--font-primary);
   }
 }

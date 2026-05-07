@@ -25,7 +25,17 @@ const cfAnalyticsToken = import.meta.env.CF_ANALYTICS_TOKEN;
   <slot name="head" />
 
   <!-- Theme init — must run before body renders, prevents FOUC -->
-  <!-- <ThemeInit /> -->
+  <script is:inline>
+    (() => {
+      try {
+        const stored = localStorage.getItem('theme');
+        const dark = stored
+          ? stored === 'dark'
+          : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      } catch (_) {}
+    })();
+  </script>
 
   <!-- Fonts -->
   <Font cssVariable="--font-headings" preload />

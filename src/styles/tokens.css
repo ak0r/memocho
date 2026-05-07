@@ -22,106 +22,98 @@
   :root:not([data-theme]) { color-scheme: light; }
 }
 
-
-/* ============================================================
-   LAYER 1 · PRIMITIVES  (--ks-*)
-   Raw values only. Never referenced in components directly.
-   ============================================================ */
-
 :root {
 
-  /* --- Canvas --- */
-  --ks-parchment:     #F5F4ED;
-  --ks-ivory:         #FAF9F5;
-  --ks-warm-sand:     #E8E6DC;
-  --ks-dark-surface:  #30302E;
-  --ks-deep-dark:     #141413;
+  /* =========================================
+   * LIGHT MODE - Raw values only.
+   * Never referenced in components directly
+   * ========================================= */
 
-  /* --- Brand --- */
-  --ks-brand:         #FFA400;
-  --ks-brand-light:   #FFC866;
+  --page-light: #F5F4ED;
+  --surface-light: #ECE7DC;
+  --elevated-light: #FAF8F2;
 
-  /* --- Warm Neutrals (R ≈ G > B always) --- */
-  --ks-near-black:    #141413;
-  --ks-dark-warm:     #3D3D3A;   /* reserved — not yet assigned */
-  --ks-charcoal:      #4D4C48;
-  --ks-olive:         #5E5D59;
-  --ks-stone:         #87867F;
-  --ks-warm-silver:   #B0AEA5;   /* reserved — not yet assigned */
+  --content-light: #22201C;
+  --muted-light: #6F6A60;
+  --minimal-light: #9A9488;
 
-  /* --- Borders & Rings --- */
-  --ks-border-cream:  #E8E5DA;
-  --ks-border-warm:   #E0DDD2;
-  --ks-border-soft:   #E5E3D8;
-  --ks-border-dark:   #30302E;
-  --ks-ring-warm:     #D1CFC5;
-  --ks-ring-deep:     #C2C0B6;
+  --border-light: #D6D0C2;
 
-  /* --- Error --- */
-  --ks-error:         #CD5C5C;
+  /* tea / clay accent */
+  --brand-light: #7B5C42;
+  --brand-soft-light: #B89A7A;
+
+  --selection-light: #E4D6C3;
+
+  /* =========================================
+   * DARK MODE - Raw values only.
+   * Never referenced in components directly
+   * ========================================= */
+
+  --page-dark: #141413;
+  --surface-dark: #1A1A18;
+  --elevated-dark: #24231F;
+
+  --content-dark: #ECE6DA;
+  --muted-dark: #B3AB9D;
+  --minimal-dark: #7B7468;
+
+  --border-dark: #34312B;
+
+  /* warm lacquer / candlelight accent */
+  --brand-dark: #C8A07A;
+  --brand-soft-dark: #9C765B;
+
+  --selection-dark: #3A3128;
+
+  /* =========================================
+   * SEMANTIC TOKENS
+   * light-dark(light-value, dark-value)
+   * No separate dark block needed.
+   * ========================================= */
+
+  --ks-page:
+    light-dark(var(--page-light), var(--page-dark));
+
+  --ks-surface:
+    light-dark(var(--surface-light), var(--surface-dark));
+
+  --ks-elevated:
+    light-dark(var(--elevated-light), var(--elevated-dark));
+
+  --ks-content:
+    light-dark(var(--content-light), var(--content-dark));
+
+  --ks-muted:
+    light-dark(var(--muted-light), var(--muted-dark));
+
+  --ks-minimal:
+    light-dark(var(--minimal-light), var(--minimal-dark));
+
+  --ks-border:
+    light-dark(var(--border-light), var(--border-dark));
+
+  --ks-brand:
+    light-dark(var(--brand-light), var(--brand-dark));
+
+  --ks-brand-soft:
+    light-dark(var(--brand-soft-light), var(--brand-soft-dark));
+
+  --ks-selection:
+    light-dark(var(--selection-light), var(--selection-dark));
+
+  /* ── Accent palette ──────────────────────────────── */
+  --ks-clay:    #d97757;
+  --ks-oat:     #e3dacc;
+  --ks-olive:   #788c5d;
+  --ks-cactus:  #bcd1ca;
+  --ks-sky:     #6a9bcc;
+  --ks-heather: #cbcadb;
+  --ks-fig:     #c46686;
+  --ks-coral:   #ebcece;
 
   /* --- Fonts --- */
-  --ks-font-serif:    'Newsreader', Georgia, serif;
-  --ks-font-sans:     'Inter', system-ui, sans-serif;
+  --ks-font-serif:    'Newsreader ', Georgia, serif;
+  --ks-font-sans:     'Poppins', system-ui, sans-serif;
   --ks-font-mono:     'JetBrains Mono', 'Fira Code', monospace;
-}
-
-
-/* ============================================================
-   LAYER 2 · SEMANTIC TOKENS
-   light-dark(light-value, dark-value) — your theme decisions
-   mapped directly. No separate dark block needed.
-
-   Light                   Dark
-   ─────────────────────────────────────────────────────────
-   paper      #F5F4ED  ←→  #141413   deep-dark
-   ink        #141413  ←→  #F5F4ED   parchment
-   ink-sec    #5E5D59  ←→  #87867F   stone
-   ink-faded  #87867F  ←→  #5E5D59   olive
-   elevated   #FAF9F5  ←→  #30302E   dark-surface
-   interactive#E8E6DC  ←→  #4D4C48   charcoal
-   inter-ink  #4D4C48  ←→  #E8E6DC   warm-sand
-   brand      #1B365D  ←→  #2D5A8A   brand-light
-   brand-sec  #2D5A8A  ←→  #1B365D   brand
-   error      #B53333  ←→  #B53333   (same)
-   ============================================================ */
-
-:root {
-
-  /* Surfaces */
-  --color-paper:        light-dark(var(--ks-parchment),   var(--ks-deep-dark));
-  --color-elevated:     light-dark(var(--ks-ivory),       var(--ks-dark-surface));
-  --color-interactive:  light-dark(var(--ks-warm-sand),   var(--ks-charcoal));
-
-  /* Text */
-  --color-ink:          light-dark(var(--ks-near-black),  var(--ks-parchment));
-  --color-ink-secondary:light-dark(var(--ks-olive),       var(--ks-stone));
-  --color-ink-faded:    light-dark(var(--ks-stone),       var(--ks-olive));
-  --color-interactive-ink: light-dark(var(--ks-charcoal), var(--ks-warm-sand));
-
-  /* Brand */
-  --color-brand:        light-dark(var(--ks-brand),       var(--ks-brand-light));
-  --color-brand-secondary: light-dark(var(--ks-brand-light), var(--ks-brand));
-
-  /* Borders */
-  --color-border:       light-dark(var(--ks-ring-warm),   var(--ks-border-dark));
-  --color-border-subtle:light-dark(var(--ks-border-warm), #252523);
-  --color-ring:         light-dark(var(--ks-ring-deep),   var(--ks-dark-surface));
-
-  /* Error */
-  --color-error:        var(--ks-error);
-
-  /* Shadows */
-  --shadow-ring:        light-dark(
-                          0 0 0 1px var(--ks-ring-warm),
-                          0 0 0 1px var(--ks-border-dark)
-                        );
-  --shadow-whisper:     light-dark(
-                          0 4px 24px rgba(0, 0, 0, 0.05),
-                          0 4px 24px rgba(0, 0, 0, 0.25)
-                        );
-  --shadow-brand:       light-dark(
-                          0 0 0 1.5px var(--ks-brand),
-                          0 0 0 1.5px var(--ks-brand-light)
-                        );
 }

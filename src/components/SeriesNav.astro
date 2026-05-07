@@ -1,0 +1,126 @@
+---
+import { type AnyPost, getPostUrl } from "@/utils/content.utils";
+import Icon from "@/components/Icon.astro";
+
+interface Props {
+  current: AnyPost;
+  posts: AnyPost[];
+}
+
+const { current, posts } = Astro.props;
+
+// Ensure correct order (seriesOrder preferred)
+const sortedPosts = [...posts].sort(
+  (a, b) =>
+    (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0)
+);
+
+const currentIndex = sortedPosts.findIndex((p) => p.id === current.id);
+const prev = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+const next = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
+
+// Open by default for short series
+const isShortSeries = sortedPosts.length <= 4;
+---
+
+{current.data.series && (
+  <nav class="series-nav my-10 border-t border-border" aria-label="Series navigation">
+
+    <details class="group" open={isShortSeries}>
+
+      <!-- Summary -->
+      <summary class="flex items-center gap-2 px-1 py-3 cursor-pointer list-none select-none">
+
+        <Icon name="notebook" class="text-minimal" size={18} />
+
+        <span class="text-xs font-mono text-minimal">
+          Series
+        </span>
+
+        <span class="text-sm text-content">
+          {current.data.series}
+        </span>
+
+        <span class="ml-auto text-xs text-minimal">
+          {currentIndex + 1} / {sortedPosts.length}
+        </span>
+
+        <!-- Chevron -->
+        <span class="ml-1 text-minimal text-xs transition-transform group-open:rotate-180">
+          ▾
+        </span>
+      </summary>
+
+      <!-- List -->
+      <ol
+        role="list"
+        class="mt-2 mb-4 pl-4 border-l border-border flex flex-col gap-1 text-sm"
+      >
+        {sortedPosts.map((post, i) => {
+          const isCurrent = post.id === current.id;
+
+          return (
+            <li class="flex items-baseline gap-2">
+
+              <!-- Counter -->
+              <span class="min-w-[2ch] text-right font-mono text-xs text-minimal opacity-60">
+                {i + 1}.
+              </span>
+
+              <!-- Title -->
+              <a
+                href={getPostUrl(post)}
+                aria-current={isCurrent ? "true" : undefined}
+                class:list={[
+                  "truncate transition",
+                  isCurrent
+                    ? "text-content font-medium"
+                    : "text-minimal hover:text-content hover:translate-x-[2px]"
+                ]}
+              >
+                {post.data.title}
+              </a>
+
+            </li>
+          );
+        })}
+      </ol>
+
+      <!-- Pagination -->
+      {(prev || next) && (
+        <div class="flex justify-between gap-6 border-t border-border px-1 py-4 text-sm">
+
+          {prev ? (
+            <a
+              href={getPostUrl(prev)}
+              class="group flex flex-col gap-1 no-underline"
+            >
+              <span class="text-minimal">← Previous</span>
+              <span class="text-content group-hover:-translate-x-[2px] transition">
+                {prev.data.title}
+              </span>
+            </a>
+          ) : (
+            <span />
+          )}
+
+          {next ? (
+            <a
+              href={getPostUrl(next)}
+              class="group flex flex-col gap-1 text-right no-underline"
+            >
+              <span class="text-minimal">Next →</span>
+              <span class="text-content group-hover:translate-x-[2px] transition">
+                {next.data.title}
+              </span>
+            </a>
+          ) : (
+            <span />
+          )}
+
+        </div>
+      )}
+
+    </details>
+  </nav>
+)}

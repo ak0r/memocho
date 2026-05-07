@@ -8,13 +8,17 @@
  * Used by: index.astro, posts/[...page].astro, tags/[tag].astro
 */
 import { type AnyPost, getPostsGroupedByYear } from "@/utils/content.utils";
-import { formatDate } from "@/utils/text.utils";
+import SectionHeader from "./SectionHeader.astro";
+import PostListItem from "./PostListItem.astro";
 
 interface Props {
   publishedPosts: AnyPost[];
   sectionTitle?: string;
   sectionDesc?: string;
   showGrouped?: boolean;
+  enableFilter?: boolean;
+  listId?: string;
+  variant?: string;
 }
 
 const { 
@@ -22,113 +26,50 @@ const {
   sectionTitle,
   sectionDesc,
   showGrouped = false,
+  enableFilter = false,
+  listId = "post-list",
+  variant = "default",
 } = Astro.props;
 
 const groupedEntries = showGrouped
   ? getPostsGroupedByYear(publishedPosts)
   : [];
 ---
-<section class="post-list">
-  {(sectionTitle || sectionDesc) && (
-    <div class="section-header mb-3">
-      {sectionTitle && (
-        <h2 class="section-title text-ink-secondary text-lg uppercase font-sans leading-loose tracking-widest">
-          {sectionTitle}
-        </h2>
-      )}
-      {sectionDesc && (
-        <span class="section-desc text-sm text-ink-faded">
-          {sectionDesc}
-        </span>
-      )}
-    </div>
-  )}
 
-  {/* GROUPED VIEW */}
+<section id={listId} class="post-list my-6 py-2">
+  <SectionHeader title={sectionTitle} subheading={sectionDesc} />
   {showGrouped ? (
     groupedEntries.map(([year, posts]) => (
-      <section class="mb-10" data-year={year}>
+      <section class="mb-6 flex flex-col" data-year={enableFilter ? year : undefined}>
 
-        <div class="flex items-center gap-3 mb-5">
-          <h3 class="text-lg font-mono text-ink-secondary">{year}</h3>
-          <div class="flex-1 h-px bg-border-subtle" />
-          <span class="text-xs font-mono text-ink-secondary whitespace-nowrap">
+        <div class="flex items-center gap-3 mb-4">
+          <h3 class="text-muted shrink-0">
+            {year}
+          </h3>
+
+          <div class="flex-1 h-px bg-ui/50" />
+
+          <span
+            data-count
+            class="text-sm text-muted whitespace-nowrap shrink-0 transition-opacity duration-150"
+          >
             {posts.length} {posts.length === 1 ? 'post' : 'posts'}
           </span>
         </div>
 
         <div role="list">
           {posts.map((post) => (
-            <article class="feed-item group flex items-center gap-4 py-2 px-2 -mx-2 mb-1 rounded-md hover:bg-elevated/50 hover:shadow-xs transition-colors">
-
-              <time
-                datetime={formatDate(post.data.published, 'seo')}
-                class="shrink-0 font-mono text-ink-faded min-w-[4.5rem]"
-              >
-                {formatDate(post.data.published, 'archive')}
-              </time>
-
-              <div class="group-hover:text-brand transition-colors">
-                {post.data.draft && (
-                  <span class="text-error/50 mr-2 font-mono text-sm">
-                    [Draft]
-                  </span>
-                )}
-
-                <a
-                  href={`/${post.collection}/${post.id}`}
-                  class="text-base hover:text-brand transition-colors rounded"
-                >
-                  {post.data.title}
-                </a>
-              </div>
-              <!-- Arrow -->
-              <div class="ml-auto opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ease-out">
-                <svg
-                  class="w-4 h-4 text-ink-faded group-hover:text-brand transition-colors"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 32 32"
-                >
-                  <path d="M5.333 14.667v2.667h16L14 24.667l1.893 1.893L26.453 16 15.893 5.44 14 7.333l7.333 7.333h-16z"></path>
-                </svg>
-              </div>
-            </article>
+            <PostListItem post={post} enableFilter={enableFilter} variant={variant} />
           ))}
         </div>
+
       </section>
     ))
   ) : (
-
-    /* FLAT VIEW */
     <div role="list">
       {publishedPosts.map((post) => (
-        <article class="group flex items-center gap-4 py-2 px-2 -mx-2 rounded-md hover:bg-elevated/50 hover:shadow-xs transition-colors">
-
-          <time
-            datetime={formatDate(post.data.published, 'seo')}
-            class="shrink-0 font-mono text-ink-faded min-w-[4.5rem]"
-          >
-            {formatDate(post.data.published, 'archive')}
-          </time>
-
-          <div class="group-hover:text-brand transition-colors">
-            {post.data.draft && (
-              <span class="text-error/50 mr-2 font-mono text-sm">
-                [Draft]
-              </span>
-            )}
-
-            <a
-              href={`/${post.collection}/${post.id}`}
-              class="text-base hover:text-brand transition-colors rounded"
-            >
-              {post.data.title}
-            </a>
-          </div>
-
-        </article>
+        <PostListItem post={post} enableFilter={enableFilter} variant={variant} />
       ))}
     </div>
-
   )}
 </section>

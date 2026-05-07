@@ -1,0 +1,61 @@
+---
+/**
+ * PostMeta — date, read time, places, and tags for posts.
+ *
+ * In list context (PostItem):  date only — "March 2nd", no icons
+ * In post context (BlogLayout): places · date · read time, then tags on next line
+ *
+ * Layout (post context):
+ *   Rajgad, Pune  ·  12 Mar 2024  ·  8 min
+ *   #tag1  #tag2
+ */
+import { ordinalSuffix } from "@/utils/text.utils";
+import Icon from "@/components/Icon.astro";
+
+interface Props {
+  published?: Date;
+  updated?:   Date;
+  readTime?:  string;
+  tags?:      string[];
+  places?:    string[];
+}
+
+const { published, updated, readTime, tags, places } = Astro.props;
+
+const displayDate = updated ?? published;
+const day   = displayDate.getDate();
+const month = displayDate.toLocaleDateString("en-US", { month: "long" });
+const year  = displayDate.getFullYear();
+
+const dateShort = `${month} ${ordinalSuffix(day)}`;
+const dateFull  = `${dateShort}, ${year}`;
+const showFull    = !!readTime || (tags && tags.length > 0) || (places && places.length > 0);
+const placesLabel = places?.join(', ') ?? null;
+---
+<section class="post-meta mb-8 text-sm font-mono text-minimal">
+  <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+    <!-- Date -->
+    <time
+      class="inline-flex items-center gap-1.5"
+      datetime={published.toISOString()}
+    >
+      {showFull && <Icon name="calendar" size={13} />}
+
+      {updated && showFull && (
+        <span class="text-muted">Updated</span>
+      )}
+
+      {showFull ? dateFull : dateShort}
+    </time>
+
+    <!-- Read time -->
+    {readTime && (
+      <span class="opacity-50" aria-hidden="true">·</span>
+      <span class="inline-flex items-center gap-1.5">
+        <Icon name="clock" size={13} />
+        {readTime}
+      </span>
+    )}
+
+  </div>
+</section>

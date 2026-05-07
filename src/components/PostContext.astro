@@ -1,0 +1,35 @@
+---
+import Icon from '@/components/Icon.astro';
+interface Props {
+  location?:  string;
+  country?: string;
+  duration?: string;
+  type?: string;
+}
+
+const { location, type } = Astro.props;
+
+---
+
+{(location || type) && (
+  <div class="post-context flex items-center gap-2 text-sm text-muted mb-4">
+
+    {location && (
+      <span class="inline-flex items-center gap-1.5">
+        <Icon aria-hidden="true" name="map-pin" size={13} />
+        {location}
+      </span>
+    )}
+
+    {location && type && (
+      <span class="opacity-50" aria-hidden="true">·</span>
+    )}
+
+    {type && (
+      <span class="inline-flex items-center">
+        {type}
+      </span>
+    )}
+
+  </div>
+)}

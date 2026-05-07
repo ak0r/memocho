@@ -1,0 +1,30 @@
+---
+interface Props {
+  title?: string;
+  subheading?: string;
+}
+
+const { title, subheading } = Astro.props;
+---
+
+<section class="page-header flex flex-col gap-3">
+
+  {/* Title */}
+  {title && (
+    <h1> {title} </h1>
+  )}
+
+  {/* Subheading */}
+  {subheading && (
+    <p class="text-muted">
+      {subheading}
+    </p>
+  )}
+
+  {/* Meta (date, read time, etc.) */}
+  <slot name="meta" />
+
+  {/* Extra content (cover, context, etc.) */}
+  <slot />
+
+</section>

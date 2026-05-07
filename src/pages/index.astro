@@ -1,12 +1,24 @@
 ---
+import { getEntry, render } from "astro:content";
 import { siteConfig } from "@/site.config";
-import BaseLayout from "@/layouts/BaseLayout.astro"
+import BaseLayout from "@/layouts/BaseLayout.astro";
+// import SEO from "@/components/SEO.astro";
+// import SchemaOrg from "@/components/SchemaOrg.astro";
 import { getPublishedPosts } from "@/utils/content.utils";
 import PostList from "@/components/PostList.astro";
 
+const homeEntry = await getEntry("pages", "home");
+const Content = homeEntry ? (await render(homeEntry)).Content : null;
+
 const publishedPosts = await getPublishedPosts();
+const recentPosts = publishedPosts.slice(0, siteConfig.recentPosts);
 ---
 <BaseLayout>
 	<h1 class="sr-only">{siteConfig.title}</h1>
-	<PostList sectionTitle="Recent" publishedPosts={publishedPosts} showGrouped={true}/>
+
+	<section class="home-intro mb-12" data-pagefind-ignore>
+    {Content ? <Content /> : null}
+  </section>
+
+	<PostList sectionTitle="Recent" publishedPosts={recentPosts} variant="home"/>
 </BaseLayout>

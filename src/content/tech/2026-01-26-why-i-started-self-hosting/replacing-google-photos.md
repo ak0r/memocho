@@ -1,11 +1,13 @@
 ---
 title: Replacing Google Photos and Drive
+slug: replacing-google-photos
 description: Moving away from Google's cloud to self-hosted alternatives. Immich for photos, Nextcloud for files - fewer features, but my data stays mine.
 category: tech
 published: 2026-02-11
 tags:
   - self-hosting
-  - privacy
+  - privacy-first
+  - test
 cover: "[[immich.png]]"
 draft: true
 series: Why I Started Self-Hosting

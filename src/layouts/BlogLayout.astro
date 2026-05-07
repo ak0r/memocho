@@ -1,0 +1,109 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getEntry } from "astro:content";
+import { Picture } from 'astro:assets';
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { type AnyPost, getPublishedPosts, getRelatedPosts, getSeriesPosts, calculateReadingTime } from "@/utils/content.utils";
+import { getGalleryImages, getCoverImage } from '@/utils/image.utils';
+import { siteConfig } from "@/site.config";
+import PageHeader from "@/components/PageHeader.astro";
+import PostMeta from "@/components/PostMeta.astro";
+import PostCover from "@/components/PostCover.astro";
+import PostContext from "@/components/PostContext.astro";
+import PostTaxonomy from "@/components/PostTaxonomy.astro";
+import PostNavigation from "@/components/PostNavigation.astro";
+import PostList from "@/components/PostList.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro"
+
+interface Props {
+  entry: AnyPost;
+}
+
+const { entry } = Astro.props;
+const isTravel = entry.collection === 'travel';
+
+const {
+  title,
+  description,
+  published,
+  updated,
+  tags,
+  cover,
+  series,
+  type = ''
+} = entry.data;
+
+// Travel-only fields
+const countries = isTravel ? (entry as CollectionEntry<'travels'>).data.countries : undefined;
+const region    = isTravel ? (entry as CollectionEntry<'travels'>).data.region    : undefined;
+const places    = isTravel ? (entry as CollectionEntry<'travels'>).data.places    : undefined;
+
+const placesLabel = places?.join(', ') ?? '';
+const allPosts      = await getPublishedPosts();
+const related       = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
+const seriesPosts   = series ? await getSeriesPosts(series) : [];
+const readTime      = calculateReadingTime(entry.body ?? "").text;
+const coverImage    = getCoverImage(cover);
+
+const currentIndex = allPosts.findIndex(
+  (p) => p.id === entry.id && p.collection === entry.collection
+);
+
+const prev = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : null;
+
+---
+<BaseLayout>
+  <Fragment slot="header">
+    <!-- Breadcrumb -->
+    <Breadcrumb label={title} />
+    
+    <!-- Page/Post Header -->
+    <PageHeader {title} />
+
+    <PostMeta
+      {published}
+      {updated}
+      {readTime}
+    />
+
+    <PostCover cover={cover} alt={title} />
+    
+    { isTravel && (
+      <PostContext type={type} location={placesLabel} />
+    )}
+    
+  </Fragment>
+  <Fragment>
+    <aside data-pagefind-body>
+
+      <!-- Pagefind Meta entries -->
+      <meta data-pagefind-meta="title[content]" content={title} />
+      <meta data-pagefind-sort="date[content]" content={published.toISOString()} />
+      <meta data-pagefind-filter="collection[content]" content={entry.collection} />
+      {tags?.map((tag) => (
+        <meta data-pagefind-filter="tag[content]" content={tag} />
+      ))}
+
+      <section class="post-content border-border " role="article">
+        <slot />
+      </section>
+      <PostTaxonomy {tags} />
+      
+      <Fragment slot="navigation">
+        <PostNavigation
+          current={entry} 
+          seriesPosts={seriesPosts}
+          prev={prev} 
+          next={next}
+        />
+      </Fragment>
+
+      <Fragment slot="after">
+        {related.length > 0 && (
+          <PostList sectionTitle="Related" publishedPosts={related} />
+        )}
+      </Fragment>
+    </aside>
+  </Fragment>
+</BaseLayout>

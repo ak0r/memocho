@@ -13,9 +13,16 @@
 import Head from "@/components/Head.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
+import ScrollToTop from "@/components/ScrollToTop.astro";
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = "en" } = Astro.props;
 ---
 <!DOCTYPE html>
-<html>
+<html lang={lang}> 
   <Head>
     <slot name="seo" slot="seo" />
     <slot name="head" slot="head" />
@@ -48,7 +55,7 @@ import Footer from "@/components/Footer.astro";
     <!-- Footer -->
     <Footer />
 
-    <!-- <ScrollToTop /> -->
+    <ScrollToTop />
     
     <!-- Additional page-specific scripts -->
     <slot name="scripts" />

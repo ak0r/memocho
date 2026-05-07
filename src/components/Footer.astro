@@ -1,0 +1,29 @@
+---
+import { siteConfig } from "@/site.config";
+---
+<footer class="footer border-t border-border py-8 mt-8">
+  <div class="wrap">
+    <div class="footer-inner flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+
+      <p class="footer-copy text-sm text-muted m-0">
+        &copy; {new Date().getFullYear()} {siteConfig.author}
+      </p>
+
+      <nav class="footer-nav flex gap-4" aria-label="Social links">
+        {siteConfig.social.map((item) => (
+          <a
+            key={item.url}
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer me"
+            aria-label={`${item.title} (opens in new tab)`}
+            class="nav-link"
+          >
+            {item.title}
+          </a>
+        ))}
+      </nav>
+
+    </div>
+  </div>
+</footer>

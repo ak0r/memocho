@@ -5,8 +5,6 @@ import { baseSchema } from './base.schema';
  * Tech post schema.
  * No location fields — those are travel-specific.
  */
-export const techSchema = z.object({
-  ...baseSchema
-});
+export const techSchema = baseSchema;
 
 export type Tech = z.infer<typeof techSchema>;

@@ -5,7 +5,7 @@
  * Import order in global.css:
  *   @import "tailwindcss";
  *   @import "./tokens.css";
- *   @import "./kami-sumi.css";
+ *   @import "./theme.css";
  *
  * tailwindcss first so @theme, @layer base, @layer components
  * have the Tailwind cascade to extend into.
@@ -26,42 +26,27 @@
    ============================================================ */
  
 @theme inline {
+
+  --color-page:       var(--ks-page);
+  --color-surface:    var(--ks-surface);
+  --color-elevated:   var(--ks-elevated);
+  --color-content:    var(--ks-content);
+  --color-muted:      var(--ks-muted);
+  --color-minimal:    var(--ks-minimal);
+  --color-border:     var(--ks-border);
+  --color-brand:      var(--ks-brand);
+  --color-brand-soft: var(--ks-brand-soft);
+  --color-selection:  var(--ks-selection);
  
-  /* --- Surfaces --- */
-  --color-paper:           var(--color-paper);
-  --color-elevated:        var(--color-elevated);
-  --color-interactive:     var(--color-interactive);
- 
-  /* --- Text --- */
-  --color-ink:             var(--color-ink);
-  --color-ink-secondary:   var(--color-ink-secondary);
-  --color-ink-faded:       var(--color-ink-faded);
-  --color-interactive-ink: var(--color-interactive-ink);
- 
-  /* --- Brand --- */
-  --color-brand:           var(--color-brand);
-  --color-brand-secondary: var(--color-brand-secondary);
- 
-  /* --- Borders --- */
-  --color-border:          var(--color-border);
-  --color-border-subtle:   var(--color-border-subtle);
-  --color-ring:            var(--color-ring);
- 
-  /* --- State --- */
-  --color-error:           var(--color-error);
- 
-  /* --- Raw primitives — escape hatch for one-offs --- */
-  --color-ks-parchment:    var(--ks-parchment);
-  --color-ks-ivory:        var(--ks-ivory);
-  --color-ks-warm-sand:    var(--ks-warm-sand);
-  --color-ks-brand:        var(--ks-brand);
-  --color-ks-brand-light:  var(--ks-brand-light);
-  --color-ks-near-black:   var(--ks-near-black);
-  --color-ks-charcoal:     var(--ks-charcoal);
-  --color-ks-olive:        var(--ks-olive);
-  --color-ks-stone:        var(--ks-stone);
-  --color-ks-error:        var(--ks-error);
- 
+  --color-clay:     var(--ks-clay);
+  --color-oat:      var(--ks-oat);
+  --color-olive:    var(--ks-olive);
+  --color-cactus:   var(--ks-cactus);
+  --color-sky:      var(--ks-sky);
+  --color-heather:  var(--ks-heather);
+  --color-fig:      var(--ks-fig);
+  --color-coral:    var(--ks-coral);
+
   /* --- Fonts --- */
   --font-serif:    var(--ks-font-serif);
   --font-sans:     var(--ks-font-sans);

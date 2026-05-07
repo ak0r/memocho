@@ -1,0 +1,42 @@
+---
+/**
+ * /travels/
+ *
+ * All travel posts with client-side filtering.
+ * Filter dimensions: type, tag, destination
+ * URL state: /travel/?type=story&tag=hiking&destination=india
+ *
+ * Year groupings are rendered at build time.
+ * The filter script hides individual items but also hides year headings
+ * when all posts in that year are filtered out.
+ */
+
+import { siteConfig } from "@/site.config";
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { getTravelPosts, getTravelTags } from "@/utils/content.utils";
+import PostList from "@/components/PostList.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import PostFilter from "@/components/PostFilter.astro";
+
+const allPosts = await getTravelPosts();
+const allTags       = await getTravelTags();
+---
+<BaseLayout>
+	<PageHeader title="Travel Stories" subheading="Travel stories from across India and the world — forts, roads, cities, and everything in between."/>
+
+	{allPosts.length > 0 ? (
+		<>
+			<PostFilter 
+				listId="travel-list"
+				tags={allTags}
+			/>
+
+			<PostList publishedPosts={allPosts} showGrouped enableFilter/>
+		</>
+	) : (
+		<p class="my-8 text-base text-fig font-mono">
+			No published posts
+		</p>
+	)}
+	
+</BaseLayout>
