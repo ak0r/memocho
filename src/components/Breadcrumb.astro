@@ -12,7 +12,7 @@ const crumbs = buildCrumbs(pathname, label);
 ---
 {crumbs.length > 1 && (
   <nav class="breadcrumb mb-6 md:mb-8" aria-label="Breadcrumb">
-    <ol class="breadcrumb__list flex items-center flex-wrap gap-1 p-0 m-0 list-none">
+    <ol class="breadcrumb__list flex items-center font-mono flex-wrap gap-1 p-0 m-0 list-none">
 
       {crumbs.map((crumb, index) => {
         const isLast = index === crumbs.length - 1;

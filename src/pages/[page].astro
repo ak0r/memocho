@@ -19,7 +19,14 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
+const last = entry.data.updated ? entry.data.updated : entry.data.published;
+
 ---
-<PageLayout {entry}>
+<PageLayout 
+  title={entry.data.title} 
+  description={entry.data.description} 
+  updated={last} 
+  showBreadcrumb
+>
   <Content />
 </PageLayout>

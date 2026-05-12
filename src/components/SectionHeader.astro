@@ -7,8 +7,8 @@ interface Props {
 const { title, subheading } = Astro.props;
 ---
 
-<section class="section-header">
-  <h2 class="section-header-title text-muted text-xl uppercase font-sans tracking-widest">{title}</h2>
+<div class="section-header flex flex-col gap-2 mb-4 py-2">
+  <h2 class="section-header-title text-muted text-xl uppercase font-sans tracking-widest m-0">{title}</h2>
   {subheading && (
     <p class="section-header-subheading ext-sm text-ink-faded">{subheading}</p>
   )}
@@ -17,4 +17,4 @@ const { title, subheading } = Astro.props;
       <slot name="meta" />
     </div>
   )}
-</section>
+</div>

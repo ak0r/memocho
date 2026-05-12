@@ -10,18 +10,8 @@
  * Min viewport: 375px  |  Max viewport: 1400px
  * Type scale: Major Third (1.25)  |  Space scale: Minor Third (1.2)
  */
-
-/* ============================================================
-   COLOR SCHEME — activates light-dark()
-   ============================================================ */
-
-:root                    { color-scheme: light; }
-:root[data-theme="dark"] { color-scheme: dark;  }
-
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) { color-scheme: light; }
 }
-
 :root {
 
   /* =========================================
@@ -111,6 +101,7 @@
   --ks-heather: #cbcadb;
   --ks-fig:     #c46686;
   --ks-coral:   #ebcece;
+  --ks-error:   #bf4d43;
 
   /* --- Fonts --- */
   --ks-font-serif:    'Newsreader ', Georgia, serif;

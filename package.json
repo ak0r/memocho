@@ -6,15 +6,25 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "ASTRO_CONTENT_COLLECTION_CACHE=false astro dev",
+    "build": "astro build && npx pagefind --site dist && cp -r dist/pagefind public/",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "sync-attachments": "node scripts/sync-attachments.js",
+    "sync-local": "./scripts/sync-local.sh",
+    "sync-content": "git submodule update --init --remote src/content && echo '✅ Content synced'"
   },
   "dependencies": {
     "@astrojs/compiler-rs": "^0.1.10",
     "@tailwindcss/vite": "^4.2.4",
     "astro": "^6.1.10",
-    "tailwindcss": "^4.2.4"
+    "glightbox": "^3.3.1",
+    "mdast": "^0.26.2",
+    "tailwindcss": "^4.2.4",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@pagefind/component-ui": "^1.5.2"
   }
 }

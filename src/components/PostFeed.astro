@@ -1,0 +1,149 @@
+---
+/*
+ * PostFeed
+ *
+ * Unified post feed renderer.
+ *
+ * Variants:
+ * - archive → grouped editorial archive
+ * - compact → flat editorial list
+ * - card    → visual card grid
+ */
+
+import { type AnyPost, getPostsGroupedByYear } from "@/utils/content.utils";
+
+import SectionHeader from "./SectionHeader.astro";
+import PostListItem from "./PostListItem.astro";
+import PostCard from "./PostCard.astro";
+
+interface Props {
+  posts: AnyPost[];
+
+  sectionTitle?: string;
+  sectionDesc?: string;
+
+  variant?: "archive" | "compact" | "card";
+
+  enableFilter?: boolean;
+  listId?: string;
+}
+
+const {
+  posts,
+
+  sectionTitle,
+  sectionDesc,
+
+  variant = "compact",
+
+  enableFilter = false,
+  listId = "post-feed",
+} = Astro.props;
+
+const isArchive = variant === "archive";
+const isCard = variant === "card";
+
+const groupedEntries = isArchive
+  ? getPostsGroupedByYear(posts)
+  : [];
+---
+
+<section id={listId} class="post-feed mb-8">
+
+  <SectionHeader
+    title={sectionTitle}
+    subheading={sectionDesc}
+  />
+
+  {/* =========================================================================
+      ARCHIVE
+     ========================================================================= */}
+
+  {isArchive ? (
+
+    groupedEntries.map(([year, yearPosts]) => (
+
+      <div
+        class="flex flex-col"
+        data-year={enableFilter ? year : undefined}
+      >
+
+        {/* Year heading */}
+        <div class="flex items-center gap-2 mb-2">
+
+          <h3 class="text-muted text-xl mb-0 shrink-0">
+            {year}
+          </h3>
+
+          <div class="flex-1 divider" />
+
+          <span
+            data-count
+            class="
+              text-sm text-muted
+              whitespace-nowrap shrink-0
+              transition-opacity duration-150
+            "
+          >
+            {yearPosts.length}
+            {" "}
+            {yearPosts.length === 1 ? "post" : "posts"}
+          </span>
+
+        </div>
+
+        {/* Posts */}
+        <div role="list">
+
+          {yearPosts.map((post) => (
+            <PostListItem
+              post={post}
+              enableFilter={enableFilter}
+              dateFormat="archive"
+            />
+          ))}
+
+        </div>
+
+      </div>
+
+    ))
+
+  ) : (
+
+    /* =======================================================================
+       COMPACT + CARD
+       ======================================================================= */
+
+    <div
+      class:list={[
+        isCard
+          ? "grid gap-6 md:grid-cols-2"
+          : "flex flex-col"
+      ]}
+      role="list"
+    >
+
+      {posts.map((post) => (
+
+        isCard ? (
+
+          <PostCard post={post} />
+
+        ) : (
+
+          <PostListItem
+            post={post}
+            enableFilter={enableFilter}
+            dateFormat="post"
+          />
+
+        )
+
+      ))}
+
+    </div>
+
+  )}
+
+</section>

@@ -9,7 +9,7 @@ interface Props {
   listId?: string; // optional if multiple lists
 }
 
-const { tags = [], types = [], destinations = [], listId = "post-list" } = Astro.props;
+const { tags = [], types = [], destinations = [], listId = "post-feed" } = Astro.props;
 
 // ── helpers ─────────────────────────────
 
@@ -51,111 +51,112 @@ const hrefWith = (patch: Record<string, string[] | null>) => {
 
 const linkClass = (active: boolean) =>
   [
-    "transition hover:text-content",
-    active && "text-content font-medium bg-elevated/40 rounded px-1.5"
+    "badge hover:text-content",
+    active && "text-content badge"
   ].filter(Boolean).join(" ");
 ---
-<section>
-  <SectionHeader title='' />
+<section class="my-8 card-outline">
+  <SectionHeader title='Filter posts' />
   
-<nav class="post-filter text-sm text-muted space-y-2">
+  <nav class="post-filter text-muted space-y-2">
 
-  {/* TAGS */}
-  {tags.length > 0 && (
-    <div class="flex flex-wrap gap-2">
-      <span class="text-sm text-muted">Tags:</span>
-      
-      <a data-filter-all href={hrefWith({ tag: null })} class="ml-4">All</a>
-      <span class="opacity-40">·</span>
+    {/* TAGS */}
+    {tags.length > 0 && (
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-sm font-bold text-muted">Tags:</span>
+        
+        <a data-filter-all href={hrefWith({ tag: null })} class="ml-4 badge ">All</a>
+        <span class="opacity-40">·</span>
 
-      {tags.map((t, i) => {
-        const key = normalize(t.key);
-        const active = activeTags.includes(key);
+        {tags.map((t, i) => {
+          const key = normalize(t.key);
+          const active = activeTags.includes(key);
 
-        return (
-          <>
-            <a
-              data-filter-tag={t.key}
-              href={activeTag === key ? Astro.url.pathname : `?tag=${t.key}`}
-            >
-              #{t.label}
-            </a>
+          return (
+            <>
+              <a
+                data-filter-tag={t.key}
+                href={activeTag === key ? Astro.url.pathname : `?tag=${t.key}`}
+                class="badge"
+              >
+                #{t.label}
+              </a>
 
-            {i < tags.length - 1 && <span class="opacity-40">·</span>}
-          </>
-        );
-      })}
-    </div>
-  )}
+              {i < tags.length - 1 && <span class="opacity-40">·</span>}
+            </>
+          );
+        })}
+      </div>
+    )}
 
-  {/* TYPE */}
-  {types.length > 0 && (
-    <div class="flex flex-wrap gap-x-2 gap-y-1">
-      <span class="text-xs font-mono text-minimal">Type:</span>
+    {/* TYPE */}
+    {types.length > 0 && (
+      <div class="flex flex-wrap gap-x-2 gap-y-1">
+        <span class="text-xs font-mono text-minimal">Type:</span>
 
-      <a href={hrefWith({ type: null })} class={linkClass(activeTypes.length === 0)}>
-        All
-      </a>
+        <a href={hrefWith({ type: null })} class={linkClass(activeTypes.length === 0)}>
+          All
+        </a>
 
-      <span class="opacity-40">·</span>
+        <span class="opacity-40">·</span>
 
-      {types.map((t, i) => {
-        const key = normalize(t);
-        const active = activeTypes.includes(key);
+        {types.map((t, i) => {
+          const key = normalize(t);
+          const active = activeTypes.includes(key);
 
-        return (
-          <>
-            <a
-              href={hrefWith({ type: toggle(activeTypes, key) })}
-              class={linkClass(active)}
-            >
-              {active && <span class="mr-1">•</span>}
-              {t}
-            </a>
+          return (
+            <>
+              <a
+                href={hrefWith({ type: toggle(activeTypes, key) })}
+                class={linkClass(active)}
+              >
+                {active && <span class="mr-1">•</span>}
+                {t}
+              </a>
 
-            {i < types.length - 1 && <span class="opacity-40">·</span>}
-          </>
-        );
-      })}
-    </div>
-  )}
+              {i < types.length - 1 && <span class="opacity-40">·</span>}
+            </>
+          );
+        })}
+      </div>
+    )}
 
-  {/* DESTINATION */}
-  {destinations.length > 0 && (
-    <div class="flex flex-wrap gap-x-2 gap-y-1">
-      <span class="text-xs font-mono text-minimal">Destination:</span>
+    {/* DESTINATION */}
+    {destinations.length > 0 && (
+      <div class="flex flex-wrap gap-x-2 gap-y-1">
+        <span class="text-xs font-mono text-minimal">Destination:</span>
 
-      <a
-        href={hrefWith({ destination: null })}
-        class={linkClass(activeDest.length === 0)}
-      >
-        All
-      </a>
+        <a
+          href={hrefWith({ destination: null })}
+          class={linkClass(activeDest.length === 0)}
+        >
+          All
+        </a>
 
-      <span class="opacity-40">·</span>
+        <span class="opacity-40">·</span>
 
-      {destinations.map((d, i) => {
-        const key = normalize(d);
-        const active = activeDest.includes(key);
+        {destinations.map((d, i) => {
+          const key = normalize(d);
+          const active = activeDest.includes(key);
 
-        return (
-          <>
-            <a
-              href={hrefWith({ destination: toggle(activeDest, key) })}
-              class={linkClass(active)}
-            >
-              {active && <span class="mr-1">•</span>}
-              {d}
-            </a>
+          return (
+            <>
+              <a
+                href={hrefWith({ destination: toggle(activeDest, key) })}
+                class={linkClass(active)}
+              >
+                {active && <span class="mr-1">•</span>}
+                {d}
+              </a>
 
-            {i < destinations.length - 1 && <span class="opacity-40">·</span>}
-          </>
-        );
-      })}
-    </div>
-  )}
+              {i < destinations.length - 1 && <span class="opacity-40">·</span>}
+            </>
+          );
+        })}
+      </div>
+    )}
 
-</nav>
+  </nav>
 </section>
 
 <script>
@@ -174,7 +175,7 @@ const linkClass = (active: boolean) =>
     dests: parse("destination"),
   };
 
-  const root = document.getElementById("post-list") || document.querySelector(".post-list");
+  const root = document.getElementById("post-feed") || document.querySelector(".post-feed");
 
   const items = root.querySelectorAll("article");
 
@@ -223,14 +224,13 @@ const linkClass = (active: boolean) =>
     const key = el.dataset.filterTag.toLowerCase();
 
     if (active.tags.includes(key)) {
-      el.classList.add("text-brand", "font-medium", "bg-surface", "rounded", "px-1.5");
+      el.classList.add("text-content", "font-bold", "bg-elevated", "badge");
     }
   });
 
   // highlight "All"
   if (active.tags.length === 0) {
     document.querySelector("[data-filter-all]")?.classList.add(
-      "text-brand", "font-medium", "bg-surface", "rounded", "px-1.5"
-    );
+      "text-content", "font-bold", "bg-elevated", "badge");
   }
 </script>

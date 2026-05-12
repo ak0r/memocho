@@ -1,26 +1,28 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { getEntry } from "astro:content";
-import { Picture } from 'astro:assets';
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { type AnyPost, getPublishedPosts, getRelatedPosts, getSeriesPosts, calculateReadingTime } from "@/utils/content.utils";
+import { type AnyPost, getPublishedPosts, getRelatedPosts, getSeriesPosts, calculateReadingTime, getPostSlug } from "@/utils/content.utils";
 import { getGalleryImages, getCoverImage } from '@/utils/image.utils';
 import { siteConfig } from "@/site.config";
 import PageHeader from "@/components/PageHeader.astro";
 import PostMeta from "@/components/PostMeta.astro";
-import PostCover from "@/components/PostCover.astro";
 import PostContext from "@/components/PostContext.astro";
 import PostTaxonomy from "@/components/PostTaxonomy.astro";
 import PostNavigation from "@/components/PostNavigation.astro";
-import PostList from "@/components/PostList.astro";
+import PostFeed from "@/components/PostFeed.astro";
+import PostGallery from "@/components/PostGallery.astro";
+import GalleryInit from '@/components/GalleryInit.astro';
 import Breadcrumb from "@/components/Breadcrumb.astro"
+import ImageWrapper from "@/components/ImageWrapper.astro";
+import SEO from "@/components/SEO.astro";
+import SchemaOrg from "@/components/SchemaOrg.astro";
 
 interface Props {
   entry: AnyPost;
 }
 
 const { entry } = Astro.props;
-const isTravel = entry.collection === 'travel';
+const isTravel = entry.collection === 'travels';
 
 const {
   title,
@@ -44,6 +46,8 @@ const related       = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
 const seriesPosts   = series ? await getSeriesPosts(series) : [];
 const readTime      = calculateReadingTime(entry.body ?? "").text;
 const coverImage    = getCoverImage(cover);
+const galleryImages = getGalleryImages(entry.filePath ?? '');
+const ogImage       = `/og/posts/${getPostSlug(entry)}.png`;
 
 const currentIndex = allPosts.findIndex(
   (p) => p.id === entry.id && p.collection === entry.collection
@@ -54,56 +58,89 @@ const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : n
 
 ---
 <BaseLayout>
+  <SEO
+    slot="seo"
+    {title}
+    description={description ?? ""}
+    type="article"
+    publishedTime={published}
+    {tags}
+    {ogImage}
+  />
   <Fragment slot="header">
-    <!-- Breadcrumb -->
-    <Breadcrumb label={title} />
-    
-    <!-- Page/Post Header -->
-    <PageHeader {title} />
+    <div class="flex flex-col gap-8">
 
-    <PostMeta
-      {published}
-      {updated}
-      {readTime}
-    />
-
-    <PostCover cover={cover} alt={title} />
-    
-    { isTravel && (
-      <PostContext type={type} location={placesLabel} />
-    )}
-    
-  </Fragment>
-  <Fragment>
-    <aside data-pagefind-body>
-
-      <!-- Pagefind Meta entries -->
-      <meta data-pagefind-meta="title[content]" content={title} />
-      <meta data-pagefind-sort="date[content]" content={published.toISOString()} />
-      <meta data-pagefind-filter="collection[content]" content={entry.collection} />
-      {tags?.map((tag) => (
-        <meta data-pagefind-filter="tag[content]" content={tag} />
-      ))}
-
-      <section class="post-content border-border " role="article">
-        <slot />
-      </section>
-      <PostTaxonomy {tags} />
+      <div class="flex flex-col gap-4">
+        <Breadcrumb label={title} />
+        <PageHeader {title}>
+          <PostMeta
+            slot="meta"
+            {published}
+            {updated}
+            {readTime}
+          />
+        </PageHeader>
+      </div>
       
-      <Fragment slot="navigation">
-        <PostNavigation
-          current={entry} 
-          seriesPosts={seriesPosts}
-          prev={prev} 
-          next={next}
+      {coverImage && (
+        <section class="rounded-lg ring ring-border shadow-sm breakout">
+        <ImageWrapper 
+          src={coverImage} 
+          alt={title}
         />
-      </Fragment>
+      </section>
+      )}
 
-      <Fragment slot="after">
-        {related.length > 0 && (
-          <PostList sectionTitle="Related" publishedPosts={related} />
-        )}
-      </Fragment>
-    </aside>
+      {isTravel && (
+        <PostContext type={type} location={placesLabel} />
+      )}
+      <div class="divider"></div>
+    </div>
   </Fragment>
+  
+  <aside data-pagefind-body>
+
+    <!-- Pagefind Meta entries -->
+    <meta data-pagefind-meta="title[content]" content={title} />
+    <meta data-pagefind-sort="date[content]" content={published.toISOString()} />
+    <meta data-pagefind-filter="collection[content]" content={entry.collection} />
+    {
+      tags?.map((tag) => (
+        <meta data-pagefind-filter="tag[content]" content={tag} />
+      ))
+    }
+
+    <section class="post-content border-border" role="article">
+      <slot />
+    </section>
+
+    {galleryImages.length > 0 && (
+      <PostGallery images={galleryImages} galleryId={entry.id} />
+    )}
+
+    <PostTaxonomy {tags} />
+  </aside>
+  
+  {/* NAVIGATION SLOT */}
+  <Fragment slot="navigation">
+    <PostNavigation
+      current={entry} 
+      seriesPosts={seriesPosts}
+      prev={prev} 
+      next={next}
+    />
+  </Fragment>
+
+  {/* AFTER SLOT */}
+  <Fragment slot="after">
+    {related.length > 0 && (
+      <PostFeed
+        posts={related}
+        variant="compact"
+        sectionTitle="Related"
+      />
+    )}
+  </Fragment>
+
+  <GalleryInit slot="scripts" />
 </BaseLayout>

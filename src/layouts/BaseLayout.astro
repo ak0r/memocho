@@ -33,7 +33,7 @@ const { lang = "en" } = Astro.props;
     
     <div class="wrap medium">
       <!-- Main content -->
-      <main>
+      <main class="flex flex-col space-y-8">
         {/* Page/Post Header Section */}
         <slot name="header" />
 
@@ -59,5 +59,6 @@ const { lang = "en" } = Astro.props;
     
     <!-- Additional page-specific scripts -->
     <slot name="scripts" />
+    <pagefind-modal></pagefind-modal>
   </body>
 </html>

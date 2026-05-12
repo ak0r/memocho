@@ -1,0 +1,29 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import { siteConfig } from "@/site.config";
+import SEO from "@/components/SEO.astro";
+---
+
+<PageLayout title="Page not found" description="Seems you are lost somewhere between roads and routes.">
+
+    <section class="flex flex-col gap-4 py-4">
+      <p class="text-lg italic text-content-muted max-w-prose">
+        Not every road leads where expected.
+      </p>
+
+      <nav
+        class="flex flex-wrap gap-x-4 gap-y-2 text-sm"
+        aria-label="Helpful links"
+      >
+        {siteConfig.navigation.map((item) => (
+          <a
+            href={item.url}
+            class="nav-link animate"
+          >
+            {item.title}
+          </a>
+        ))}
+      </nav>
+
+    </section>
+</PageLayout>

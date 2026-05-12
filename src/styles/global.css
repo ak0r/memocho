@@ -1,4 +1,6 @@
 @import "tailwindcss";
+
+@import "glightbox/dist/css/glightbox.css";
 @import "./tokens.css";
 @import "./theme.css";
 @import "./typography.css";

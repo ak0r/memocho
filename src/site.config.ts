@@ -22,8 +22,6 @@ export interface SiteConfig {
   recentPosts: number;
   relatedPosts: number;
   postsPerPage: number;
-  pageWidth: string;
-  contentWidth: string;
 }
 
 export const siteConfig: SiteConfig = {
@@ -40,17 +38,26 @@ export const siteConfig: SiteConfig = {
       url: "https://github.com/ak0r/memocho",
       icon: "github",
     },
+    {
+      title: "X",
+      url: "https://x.com/trekography",
+      icon: "X",
+    },
+    {
+      title: "Instagram",
+      url: "https://instagram.com/trekography",
+      icon: "instagram",
+    },
   ],
   navigation: [
     { title: "Travel",       url: "/travels" },
     { title: "Tech",         url: "/tech" },
-    { title: "Destinations", url: "/destinations" },
+    // { title: "Destinations", url: "/destinations" },
+    { title: "Now",        url: "/now" },
+    { title: "Uses",        url: "/uses" },
     { title: "About",        url: "/about" },
-    { title: "Search",       url: "/search" },
   ],
-  recentPosts: 4,
+  recentPosts: 6,
   relatedPosts: 4,
-  postsPerPage: 20,
-  pageWidth: "lg",
-  contentWidth: "md"
+  postsPerPage: 8,
 };

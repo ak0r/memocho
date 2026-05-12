@@ -1,16 +1,17 @@
 ---
-import type { CollectionEntry } from "astro:content";
-// import SEO from "@/components/SEO.astro";
+import SEO from "@/components/SEO.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import PageHeader from "@/components/PageHeader.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 
 interface Props {
-  entry: CollectionEntry<"pages">;
+  title: string;
+  description?: string;
+  updated?: Date;
+  showBreadcrumb?: boolean;
 }
 
-const { entry } = Astro.props;
-const { title, description, updated } = entry.data;
+const { title, description, updated, showBreadcrumb = true } = Astro.props;
 
 const formattedDate = updated?.toLocaleDateString("en-US", {
   year: "numeric",
@@ -19,17 +20,22 @@ const formattedDate = updated?.toLocaleDateString("en-US", {
 ---
 
 <BaseLayout>
-  <!-- <SEO slot="seo" {title} description={description ?? ""} /> -->
+  <SEO slot="seo" {title} description={description ?? ""} />
+
   <Fragment slot="header">
-    <Breadcrumb label={title} />
-    <PageHeader {title}>
+    {showBreadcrumb && <Breadcrumb label={title} />}
+
+    <PageHeader {title} subheading={description} >
       {updated && (
-        <span slot="meta">Updated {formattedDate}</span>
+        <div slot="meta">
+          <span class="text-minimal text-sm">Updated {formattedDate}</span>
+        </div>
       )}
     </PageHeader>
   </Fragment>
-  <Fragment>
+  <section data-pagefind-body class="page-content my-8">
+    <meta data-pagefind-filter="collection[content]" content="page" />
+    <meta data-pagefind-sort="date[content]" content={formattedDate} />
     <slot />
-  </Fragment>
-  <!-- navigation and after slots unused for static pages -->
+  </section>
 </BaseLayout>

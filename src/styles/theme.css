@@ -46,6 +46,7 @@
   --color-heather:  var(--ks-heather);
   --color-fig:      var(--ks-fig);
   --color-coral:    var(--ks-coral);
+  --color-error:    var(--ks-error);
 
   /* --- Fonts --- */
   --font-serif:    var(--ks-font-serif);

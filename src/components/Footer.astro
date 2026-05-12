@@ -1,15 +1,15 @@
 ---
 import { siteConfig } from "@/site.config";
 ---
-<footer class="footer border-t border-border py-8 mt-8">
+<footer class="footer border-t border-border py-8 my-8">
   <div class="wrap">
-    <div class="footer-inner flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="footer-inner flex flex-col md:flex-row sm:flex-row items-center justify-between gap-4">
 
-      <p class="footer-copy text-sm text-muted m-0">
+      <p class="footer-copy font-mono text-sm text-muted m-0">
         &copy; {new Date().getFullYear()} {siteConfig.author}
       </p>
 
-      <nav class="footer-nav flex gap-4" aria-label="Social links">
+      <nav class="footer-nav font-mono flex gap-4" aria-label="Social links">
         {siteConfig.social.map((item) => (
           <a
             key={item.url}

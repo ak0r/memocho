@@ -10,7 +10,7 @@ const cfAnalyticsToken = import.meta.env.CF_ANALYTICS_TOKEN;
   <meta name="generator" content={Astro.generator} />
 
    <!-- Browser chrome color — matches slate-050 / slate-950 palette -->
-  <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#F5F4ED" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)" />
   
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -32,10 +32,25 @@ const cfAnalyticsToken = import.meta.env.CF_ANALYTICS_TOKEN;
         const dark = stored
           ? stored === 'dark'
           : matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        const theme = dark ? 'dark' : 'light';
+        document.documentElement.style.colorScheme = theme;
+        // Pagefind theme
+        document.documentElement.setAttribute('data-pf-theme', theme);
+
       } catch (_) {}
     })();
   </script>
+
+  <link
+    href="/pagefind/pagefind-component-ui.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/src/styles/pagefind.css" />
+
+  <script
+    src="/pagefind/pagefind-component-ui.js"
+    type="module"
+  ></script>
 
   <!-- Fonts -->
   <Font cssVariable="--font-headings" preload />

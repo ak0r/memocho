@@ -1,6 +1,8 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
-
+import remarkCallouts from './src/utils/remark-callouts';
+import { remarkObsidianCore } from './src/utils/remark-obsidian-core';
+import { remarkImageProcessing } from './src/utils/remark-image-processing';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
@@ -72,5 +74,13 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()]
-  }
+  },
+
+  markdown: {
+    remarkPlugins: [
+      remarkObsidianCore,
+      remarkImageProcessing,
+      remarkCallouts,
+    ],
+  },
 });

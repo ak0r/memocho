@@ -1,0 +1,116 @@
+---
+/**
+ * PostCard.astro
+ *
+ * Homepage discovery card.
+ * Visual-first alternative to PostList.
+ *
+ * Usage:
+ * <PostCard post={post} />
+ */
+
+import type { AnyPost } from "@/utils/content.utils";
+import { formatDate, titleify } from "@/utils/text.utils";
+import { getCoverImage } from '@/utils/image.utils';
+import ImageWrapper from '@/components/ImageWrapper.astro';
+
+interface Props {
+  post: AnyPost;
+}
+
+const { post } = Astro.props;
+const href = `/${post.collection}/${post.id}`;
+
+const {
+  title,
+  description,
+  published,
+  cover,
+  tags = [],
+} = post.data;
+
+const coverImage = getCoverImage(cover);
+
+const collectionBadgeClass =
+  post.collection === "travels"
+    ? "badge-travel"
+    : "badge-tech";
+---
+
+<article class="group card-post flex flex-col gap-4">
+
+  {/* Cover */}
+
+  {cover && (
+    <ImageWrapper 
+      src={coverImage} 
+      alt={title}
+      class="aspect-[3/2] w-full object-cover"
+    />
+  )}
+
+  {/* Content */}
+  <div class="flex flex-1 flex-col gap-3 p-1">
+
+    {/* Meta */}
+    <div class="flex items-center gap-2 text-xs font-mono text-minimal">
+
+      {post.data.draft && (
+        <span class="bg-fig/20 text-fig badge">
+          Draft
+        </span>
+        <span aria-hidden="true">·</span>
+      )}
+      <!-- <span class:list={["badge", collectionBadgeClass]}>
+        {titleify(post.collection)}
+      </span> -->
+
+      <time datetime={formatDate(published, "seo")}>
+        {formatDate(published, "post")}
+      </time>
+
+    </div>
+
+    {/* Title */}
+    <h2 class="m-0 text-lg leading-snug">
+      <a
+        href={href}
+        class="text-content no-underline"
+      >
+        {title}
+      </a>
+    </h2>
+
+    {/* Description */}
+    {description && (
+      <p class="m-0 text-sm leading-relaxed text-muted">
+        {description}
+      </p>
+    )}
+
+    {/* Footer */}
+    <div class="mt-auto flex items-center justify-between pt-2">
+
+      {/* Tags */}
+      {tags.length > 0 && (
+        <div class="flex flex-wrap gap-1">
+          {tags.slice(0, 2).map((tag) => (
+            <span class="text-xs text-minimal font-mono">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Arrow */}
+      <span
+        class="animate-move translate-x-1 opacity-0 text-minimal group-hover:translate-x-0 group-hover:opacity-100"
+        aria-hidden="true"
+      >
+        →
+      </span>
+
+    </div>
+
+  </div>
+</article>

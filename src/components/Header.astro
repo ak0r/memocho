@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from "@/site.config";
 import Logo from '@/components/Logo.astro';
+import Icon from "@/components/Icon.astro";
 
 const currentPath = new URL(Astro.request.url).pathname;
 function isActive(href: string): boolean {
@@ -27,7 +28,7 @@ function isActive(href: string): boolean {
         {siteConfig.navigation.map((item) => (
           <a
             href={item.url}
-            class="nav-link"
+            class="nav-link animate"
             aria-current={isActive(item.url) ? "page" : undefined}
           >
             {item.title}
@@ -37,19 +38,23 @@ function isActive(href: string): boolean {
 
       <!-- Theme toggle + hamburger (grouped right) -->
       <div class="flex items-center gap-3">
+        <pagefind-modal-trigger compact hide-shortcut>
+        </pagefind-modal-trigger>
         <button
           id="theme-toggle"
           class="btn btn--ghost btn--icon"
           aria-label="Toggle theme"
           title="Toggle light/dark theme"
         >
-          <svg class="icon-sun hidden" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-          </svg>
-          <svg class="icon-moon block" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-          </svg>
+        <Icon name="sun" size={20} class="hidden icon icon-sun text-muted animate"/>
+        <Icon name="moon" size={20} class="block icon icon-moon text-muted animate"/>
+        <!-- <svg class="icon-sun hidden text-muted" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <svg class="icon-moon block" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg> -->
         </button>
 
         <button
@@ -59,11 +64,13 @@ function isActive(href: string): boolean {
           aria-expanded="false"
           aria-controls="nav-mobile"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <!-- <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="4" x2="20" y1="6" y2="6"/>
             <line x1="4" x2="20" y1="12" y2="12"/>
             <line x1="4" x2="20" y1="18" y2="18"/>
-          </svg>
+          </svg> -->
+          <Icon name="menu" size={20} class="icon icon-menu text-muted block animate" />
+          <Icon name="x" size={20} class="icon icon-close text-muted hidden animate" />
         </button>
       </div>
     </div>
@@ -71,12 +78,12 @@ function isActive(href: string): boolean {
 
   <!-- Mobile dropdown -->
   <div id="nav-mobile" class="site-header__mobile border-t border-border bg-page" hidden>
-    <div class="site-header__mobile-inner flex flex-col px-4 py-4 gap-1">
+    <div class="site-header__mobile-inner flex flex-col mx-auto px-4 py-4 gap-4">
       {siteConfig.navigation.map((item) => (
         <a
           href={item.url}
-          class="nav-link text-base py-2.5 px-3 rounded-lg w-full hover:font-bold"
-          aria-current={isActive(item.url) ? "page font-medium" : undefined}
+          class="nav-link animate mx-auto"
+          aria-current={isActive(item.url) ? "page" : undefined}
         >
           {item.title}
         </a>
@@ -86,11 +93,62 @@ function isActive(href: string): boolean {
 </header>
 
 <script>
+  
+  function updateThemeIcons() {
+    const sun  = document.querySelector('.icon-sun');
+    const moon = document.querySelector('.icon-moon');
+
+    if (!sun || !moon) return;
+
+    const isDark = document.documentElement.style.colorScheme === 'dark';
+
+    if (isDark) {
+      sun.classList.remove('hidden');
+      sun.classList.add('block');
+
+      moon.classList.remove('block');
+      moon.classList.add('hidden');
+    } else {
+      sun.classList.add('hidden');
+      sun.classList.remove('block');
+
+      moon.classList.remove('hidden');
+      moon.classList.add('block');
+    }
+  }
+
   document.getElementById('theme-toggle')?.addEventListener('click', () => {
-    const isDark = document.documentElement.style.colorScheme !== 'dark';
-    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
-    try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (_) {}
+    const isDark =
+      document.documentElement.style.colorScheme !== 'dark';
+    const theme = isDark ? 'dark' : 'light';
+    document.documentElement.style.colorScheme = theme;
+    // Pagefind theme
+    document.documentElement.setAttribute('data-pf-theme', theme);
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (_) {}
+    updateThemeIcons();
   });
+
+  function updateNavIcons(isOpen) {
+    const menu  = document.querySelector('.icon-menu');
+    const close = document.querySelector('.icon-close');
+    if (!menu || !close) return;
+
+    if (isOpen) {
+      menu.classList.remove('block');
+      menu.classList.add('hidden');
+
+      close.classList.remove('hidden');
+      close.classList.add('block');
+    } else {
+      menu.classList.remove('hidden');
+      menu.classList.add('block');
+
+      close.classList.remove('block');
+      close.classList.add('hidden');
+    }
+  }
 
   function initMobileNav() {
     const navToggle = document.getElementById('nav-toggle');
@@ -100,15 +158,19 @@ function isActive(href: string): boolean {
     // Toggle open/close
     navToggle.addEventListener('click', () => {
       const isHidden = navMobile.hasAttribute('hidden');
+      const willOpen = isHidden;
+
       navMobile.toggleAttribute('hidden', !isHidden);
-      navToggle.setAttribute('aria-expanded', String(isHidden));
+      navToggle.setAttribute('aria-expanded', String(willOpen));
+
+      updateNavIcons(willOpen); 
     });
 
-    // Close when a nav link is clicked (SPA navigation)
     navMobile.querySelectorAll('.nav-link').forEach((link) => {
       link.addEventListener('click', () => {
         navMobile.setAttribute('hidden', '');
         navToggle.setAttribute('aria-expanded', 'false');
+        updateNavIcons(false); 
       });
     });
 
@@ -118,17 +180,25 @@ function isActive(href: string): boolean {
       if (e.matches) {
         navMobile.setAttribute('hidden', '');
         navToggle.setAttribute('aria-expanded', 'false');
+        updateNavIcons(false); 
       }
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && navToggle.checked) {
-        navToggle.checked = false;
+      if (e.key === 'Escape') {
+        navMobile.setAttribute('hidden', '');
+        navToggle.setAttribute('aria-expanded', 'false');
+        updateNavIcons(false); 
       }
     });
+
+    const isOpen = !navMobile.hasAttribute('hidden');
+    updateNavIcons(isOpen);
   }
 
   initMobileNav();
+  updateThemeIcons();
+  document.addEventListener('astro:after-swap', updateThemeIcons);
   document.addEventListener('astro:after-swap', initMobileNav);
 </script>
 

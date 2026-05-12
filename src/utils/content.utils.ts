@@ -303,3 +303,48 @@ async function getTagsFrom(source: () => Promise<AnyPost[]>) {
 export const getTravelTags = () => getTagsFrom(getTravelPosts);
 export const getTechTags   = () => getTagsFrom(getTechPosts);
 export const getAllTags    = () => getTagsFrom(getPublishedPosts);
+
+// ── Destination queries ────────────────────────────────────────────────────────
+
+export async function getAllDestinations(): Promise<
+  CollectionEntry<"destinations">[]
+> {
+  const destinations = await getCollection("destinations");
+  return destinations.sort((a, b) =>
+    a.data.title.localeCompare(b.data.title)
+  );
+}
+
+export async function getPlacesByDestination(): Promise<Map<string, string[]>> {
+  const posts = await getTravelPosts();
+  const map   = new Map<string, string[]>();
+
+  for (const post of posts) {
+    for (const id of getCountryIds(post)) {
+      if (!map.has(id)) map.set(id, []);
+      const existing = map.get(id)!;
+      for (const place of post.data.places ?? []) {
+        if (!existing.includes(place)) existing.push(place);
+      }
+    }
+  }
+
+  for (const [id, places] of map) {
+    map.set(id, [...places].sort((a, b) => a.localeCompare(b)));
+  }
+
+  return map;
+}
+
+export async function getPostCountByDestination(): Promise<Map<string, number>> {
+  const posts = await getTravelPosts();
+  const map   = new Map<string, number>();
+
+  for (const post of posts) {
+    for (const id of getCountryIds(post)) {
+      map.set(id, (map.get(id) ?? 0) + 1);
+    }
+  }
+
+  return map;
+}
