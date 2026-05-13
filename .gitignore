@@ -36,3 +36,6 @@ src/content/pages/*
 src/content/desinations/*
 
 !src/content/.git
+
+# Local sync file
+scripts/sync-local.sh
