@@ -116,3 +116,55 @@ export function ordinalSuffix(day: number): string {
     default: return `${day}th`;
   }
 }
+
+/**
+ * Normalise a string with spaces to include '-'.
+ * Mirrors what Astro's glob loader does to filenames.
+ *
+ * "India"     → "india"
+ * "Sri Lanka" → "sri-lanka"
+ */
+
+export function normalize(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, "-");
+}
+
+
+// ── Reading time ───────────────────────────────────────────────────────────────
+
+export interface ReadingTime {
+  text: string;
+  minutes: number;
+  time: number;
+  words: number;
+}
+
+export function calculateReadingTime(
+  content: string,
+  wordsPerMinute = 200
+): ReadingTime {
+  if (!content || typeof content !== "string") {
+    return { text: "1 min read", minutes: 1, time: 60000, words: 0 };
+  }
+
+  const plainText = content
+    .replace(/^---\n[\s\S]*?\n---\n/, "")
+    .replace(/!\[.*?\]\(.*?\)/g, "")
+    .replace(/\[.*?\]\(.*?\)/g, "$1")
+    .replace(/`{1,3}.*?`{1,3}/gs, "")
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/[*_~`]/g, "")
+    .replace(/\n+/g, " ")
+    .trim();
+
+  const words     = plainText.split(/\s+/).filter((w) => w.length > 0);
+  const wordCount = words.length;
+  const minutes   = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+
+  return {
+    text: `${minutes} min read`,
+    minutes,
+    time: minutes * 60 * 1000,
+    words: wordCount,
+  };
+}

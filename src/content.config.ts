@@ -1,15 +1,10 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { travelSchema, techSchema, pageSchema } from '@/schemas';
+import { postSchema, travelSchema, techSchema, pageSchema } from '@/schemas';
 
-const travels = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/travels' }),
-  schema: travelSchema,
-});
-
-const tech = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/tech' }),
-  schema: techSchema,
+const posts = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/posts' }),
+  schema: postSchema,
 });
 
 const pages = defineCollection({
@@ -17,4 +12,4 @@ const pages = defineCollection({
   schema: pageSchema,
 });
 
-export const collections = { travels, tech, pages };
+export const collections = { posts, pages };

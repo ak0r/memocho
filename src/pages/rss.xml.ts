@@ -1,10 +1,10 @@
 import rss from "@astrojs/rss";
 import { siteConfig } from "@/site.config";
-import { getPublishedPosts, getPostUrl } from "@/utils/content.utils";
+import { getAllPosts, getPostUrl } from "@/utils/content.utils";
 import type { APIContext } from "astro";
 
 export async function GET(context: APIContext) {
-  const posts = await getPublishedPosts();
+  const posts = await getAllPosts();
 
   return rss({
     title: siteConfig.title,

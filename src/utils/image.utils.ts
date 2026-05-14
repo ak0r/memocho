@@ -130,7 +130,7 @@ export function getGalleryImages(filePath: string): GalleryImage[] {
   if (!postDir) return [];
 
   return Object.entries(allGalleryImages)
-    .filter(([path]) => path.includes(`/travels/${postDir}/gallery/`))
+    .filter(([path]) => path.includes(`/posts/${postDir}/gallery/`))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([path, mod]) => {
       const filename = path.split('/').pop() ?? '';

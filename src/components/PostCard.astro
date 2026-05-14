@@ -9,17 +9,17 @@
  * <PostCard post={post} />
  */
 
-import type { AnyPost } from "@/utils/content.utils";
+import type { Post } from "@/utils/content.utils";
 import { formatDate, titleify } from "@/utils/text.utils";
 import { getCoverImage } from '@/utils/image.utils';
 import ImageWrapper from '@/components/ImageWrapper.astro';
 
 interface Props {
-  post: AnyPost;
+  post: Post;
 }
 
 const { post } = Astro.props;
-const href = `/${post.collection}/${post.id}`;
+const href = `/${post.id}`;
 
 const {
   title,
@@ -31,10 +31,10 @@ const {
 
 const coverImage = getCoverImage(cover);
 
-const collectionBadgeClass =
-  post.collection === "travels"
-    ? "badge-travel"
-    : "badge-tech";
+// const collectionBadgeClass =
+//   post.collection === "travels"
+//     ? "badge-travel"
+//     : "badge-tech";
 ---
 
 <article class="group card-post flex flex-col gap-4">

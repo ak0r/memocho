@@ -1,12 +1,12 @@
 ---
-import { type AnyPost, getPostUrl } from "@/utils/content.utils";
+import { type Post, getPostUrl } from "@/utils/content.utils";
 import Icon from "@/components/Icon.astro";
 
 interface Props {
-  current: AnyPost;
-  seriesPosts?: AnyPost[];
-  prev?: AnyPost;
-  next?: AnyPost;
+  current: Post;
+  seriesPosts?: Post[];
+  prev?: Post;
+  next?: Post;
 }
 
 const { current, seriesPosts = [], prev, next } = Astro.props;

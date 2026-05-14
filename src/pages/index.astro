@@ -4,12 +4,11 @@ import { siteConfig } from "@/site.config";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SEO from "@/components/SEO.astro";
 import SchemaOrg from "@/components/SchemaOrg.astro";
-import { getTravelPosts, getTechPosts } from "@/utils/content.utils";
+import { getAllPosts } from "@/utils/content.utils";
 import PostFeed from "@/components/PostFeed.astro";
 import HomeIntro from "@/components/HomeIntro.astro";
 
-const travelPosts = await getTravelPosts();
-const techPosts = await getTechPosts();
+const allPosts = await getAllPosts();
 ---
 <BaseLayout>
 	<SEO slot="seo" title="Home" description={siteConfig.description} ogImage="/og/default.png" />
@@ -19,14 +18,14 @@ const techPosts = await getTechPosts();
 	<HomeIntro />
 	
 	<PostFeed
-		posts={travelPosts.slice(0, siteConfig.recentPosts)}
+		posts={allPosts.slice(0, siteConfig.recentPosts)}
 		variant="card"
-		sectionTitle="Recent Travels"
+		sectionTitle="Recent"
 	/>
-
+<!-- 
 	<PostFeed
-		posts={techPosts.slice(0, siteConfig.recentPosts)}
+		posts={allPosts.slice(0, siteConfig.recentPosts)}
 		variant="compact"
 		sectionTitle="Recent Tech"
-	/>
+	/> -->
 </BaseLayout>

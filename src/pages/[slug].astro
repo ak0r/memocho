@@ -1,0 +1,61 @@
+---
+import { getCollection, render } from "astro:content";
+import PageLayout from "@/layouts/PageLayout.astro";
+import PostLayout from "@/layouts/PostLayout.astro";
+import { getPostSlug, getAllPosts } from "@/utils/content.utils";
+
+export async function getStaticPaths() {
+
+  const RESERVED = new Set([ "archive", "search", "feed", ]);
+
+  const allPages = await getCollection(
+    "pages",
+    ({ id, data }) =>
+      !data.draft &&
+      !RESERVED.has(id)
+  );
+
+  const allPosts = await getAllPosts();
+  
+  return [
+
+    ...allPages.map((entry) => ({
+      params: { slug: entry.id, },
+
+      props: {
+        entry,
+        collection: "pages",
+      },
+    })),
+
+    ...allPosts.map((entry) => ({
+      params: { slug: getPostSlug(entry), },
+
+      props: {
+        entry,
+        collection: "posts",
+      },
+    })),
+
+  ];
+}
+
+const { entry, collection, } = Astro.props;
+const { Content, } = await render(entry);
+---
+
+{
+  collection === "pages" ? (
+
+    <PageLayout entry={entry} showBreadcrumb>
+      <Content />
+    </PageLayout>
+
+  ) : (
+
+    <PostLayout entry={entry}>
+      <Content />
+    </PostLayout>
+
+  )
+}

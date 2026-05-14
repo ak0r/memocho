@@ -13,10 +13,6 @@ export const baseSchema = z.object({
   published: z.coerce.date(),
   updated: z.coerce.date().optional(),
   draft: z.boolean().default(false),
-  cover: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  series: z.string().optional(),
-  order: z.number().optional(),
   lang: z.string().optional(),
 });
 

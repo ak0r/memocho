@@ -1,158 +1,125 @@
 ---
+/**
+ * PostFilter
+ *
+ * Client-side filter bar. State lives entirely in JS (Sets per dimension)
+ * and is synced to the URL via history.replaceState — no page reloads,
+ * true multi-select across all dimensions.
+ *
+ * Expects PostFeed to render articles with:
+ *   data-year, data-tags (JSON array), data-type, data-destination (JSON array)
+ * and year groups with data-year-group + data-count.
+ */
+
 import { type TagInfo } from '@/utils/content.utils';
 import SectionHeader from '@/components/SectionHeader.astro';
 
 interface Props {
-  tags?: TagInfo[];
-  types?: string[];
+  tags?:         TagInfo[];
+  types?:        string[];
   destinations?: string[];
-  listId?: string; // optional if multiple lists
+  years?:        number[];
 }
 
-const { tags = [], types = [], destinations = [], listId = "post-feed" } = Astro.props;
+const {
+  tags         = [],
+  types        = [],
+  destinations = [],
+  years        = [],
+} = Astro.props;
 
-// ── helpers ─────────────────────────────
-
-const normalize = (v?: string | null) => v?.toLowerCase().trim();
-const activeTag = normalize(Astro.url.searchParams.get("tag"));
-
-// read multi-select params
-const parse = (key: string) =>
-  (Astro.url.searchParams.get(key) ?? "")
-    .split(",")
-    .map(normalize)
-    .filter(Boolean);
-
-const activeTags = parse("tag");
-const activeTypes = parse("type");
-const activeDest = parse("destination");
-
-// toggle helper (add/remove)
-const toggle = (arr: string[], val: string) =>
-  arr.includes(val)
-    ? arr.filter(v => v !== val)
-    : [...arr, val];
-
-// build URL
-const hrefWith = (patch: Record<string, string[] | null>) => {
-  const u = new URL(Astro.url.pathname, Astro.url);
-
-  // copy existing
-  Astro.url.searchParams.forEach((v, k) => u.searchParams.set(k, v));
-
-  // apply patch
-  Object.entries(patch).forEach(([k, arr]) => {
-    if (!arr || arr.length === 0) u.searchParams.delete(k);
-    else u.searchParams.set(k, arr.join(","));
-  });
-
-  return u.pathname + u.search;
-};
-
-const linkClass = (active: boolean) =>
-  [
-    "badge hover:text-content",
-    active && "text-content badge"
-  ].filter(Boolean).join(" ");
+// Pill classes — inactive / active. Active state is toggled by JS at runtime.
+const pill = "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer text-muted border border-current/20 hover:text-content hover:border-current/40 aria-pressed:bg-elevated aria-pressed:text-content aria-pressed:border-transparent";
 ---
-<section class="my-8 card-outline">
-  <SectionHeader title='Filter posts' />
-  
-  <nav class="post-filter text-muted space-y-2">
+
+<section class="my-8 card-outline" id="post-filter">
+
+  <div class="flex items-center justify-between mb-4">
+    <SectionHeader title="Filter" />
+    <button
+      id="filter-clear"
+      hidden
+      class="text-xs font-mono text-minimal hover:text-content transition-colors shrink-0 cursor-pointer"
+    >
+      Clear all ×
+    </button>
+  </div>
+
+  <nav class="space-y-4" id="filter-groups">
+
+    {/* YEAR */}
+    {years.length > 0 && (
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
+        <span class="text-xs font-mono text-minimal w-24 shrink-0 pt-1">Year</span>
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by year">
+          {years.map((year) => (
+            <button
+              class={pill}
+              data-filter-dim="year"
+              data-filter-val={String(year)}
+              aria-pressed="false"
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
 
     {/* TAGS */}
     {tags.length > 0 && (
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="text-sm font-bold text-muted">Tags:</span>
-        
-        <a data-filter-all href={hrefWith({ tag: null })} class="ml-4 badge ">All</a>
-        <span class="opacity-40">·</span>
-
-        {tags.map((t, i) => {
-          const key = normalize(t.key);
-          const active = activeTags.includes(key);
-
-          return (
-            <>
-              <a
-                data-filter-tag={t.key}
-                href={activeTag === key ? Astro.url.pathname : `?tag=${t.key}`}
-                class="badge"
-              >
-                #{t.label}
-              </a>
-
-              {i < tags.length - 1 && <span class="opacity-40">·</span>}
-            </>
-          );
-        })}
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
+        <span class="text-xs font-mono text-minimal w-24 shrink-0 pt-1">Tags</span>
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by tag">
+          {tags.map((t) => (
+            <button
+              class={pill}
+              data-filter-dim="tag"
+              data-filter-val={t.key.toLowerCase().trim()}
+              aria-pressed="false"
+            >
+              #{t.label}
+            </button>
+          ))}
+        </div>
       </div>
     )}
 
     {/* TYPE */}
     {types.length > 0 && (
-      <div class="flex flex-wrap gap-x-2 gap-y-1">
-        <span class="text-xs font-mono text-minimal">Type:</span>
-
-        <a href={hrefWith({ type: null })} class={linkClass(activeTypes.length === 0)}>
-          All
-        </a>
-
-        <span class="opacity-40">·</span>
-
-        {types.map((t, i) => {
-          const key = normalize(t);
-          const active = activeTypes.includes(key);
-
-          return (
-            <>
-              <a
-                href={hrefWith({ type: toggle(activeTypes, key) })}
-                class={linkClass(active)}
-              >
-                {active && <span class="mr-1">•</span>}
-                {t}
-              </a>
-
-              {i < types.length - 1 && <span class="opacity-40">·</span>}
-            </>
-          );
-        })}
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
+        <span class="text-xs font-mono text-minimal w-24 shrink-0 pt-1">Type</span>
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by type">
+          {types.map((t) => (
+            <button
+              class={pill}
+              data-filter-dim="type"
+              data-filter-val={t.toLowerCase().trim()}
+              aria-pressed="false"
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
     )}
 
     {/* DESTINATION */}
     {destinations.length > 0 && (
-      <div class="flex flex-wrap gap-x-2 gap-y-1">
-        <span class="text-xs font-mono text-minimal">Destination:</span>
-
-        <a
-          href={hrefWith({ destination: null })}
-          class={linkClass(activeDest.length === 0)}
-        >
-          All
-        </a>
-
-        <span class="opacity-40">·</span>
-
-        {destinations.map((d, i) => {
-          const key = normalize(d);
-          const active = activeDest.includes(key);
-
-          return (
-            <>
-              <a
-                href={hrefWith({ destination: toggle(activeDest, key) })}
-                class={linkClass(active)}
-              >
-                {active && <span class="mr-1">•</span>}
-                {d}
-              </a>
-
-              {i < destinations.length - 1 && <span class="opacity-40">·</span>}
-            </>
-          );
-        })}
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
+        <span class="text-xs font-mono text-minimal w-24 shrink-0 pt-1">Destination</span>
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by destination">
+          {destinations.map((d) => (
+            <button
+              class={pill}
+              data-filter-dim="destination"
+              data-filter-val={d.toLowerCase().trim()}
+              aria-pressed="false"
+            >
+              {d}
+            </button>
+          ))}
+        </div>
       </div>
     )}
 
@@ -160,77 +127,115 @@ const linkClass = (active: boolean) =>
 </section>
 
 <script>
-  const params = new URLSearchParams(window.location.search);
+  function initFilter() {
+    const feed  = document.querySelector<HTMLElement>(".post-feed");
+    const bar   = document.getElementById("post-filter");
+    const clear = document.getElementById("filter-clear") as HTMLButtonElement | null;
 
-  const parse = (key) =>
-    (params.get(key) || "")
-      .toLowerCase()
-      .split(",")
-      .map(v => v.trim())
-      .filter(Boolean);
+    if (!feed || !bar) return;
 
-  const active = {
-    tags: parse("tag"),
-    types: parse("type"),
-    dests: parse("destination"),
-  };
+    const pills      = bar.querySelectorAll<HTMLButtonElement>("[data-filter-dim]");
+    const articles   = feed.querySelectorAll<HTMLElement>("article");
+    const yearGroups = feed.querySelectorAll<HTMLElement>("[data-year-group]");
 
-  const root = document.getElementById("post-feed") || document.querySelector(".post-feed");
+    // ── state: one Set per dimension, seeded from URL ─────────────────────
 
-  const items = root.querySelectorAll("article");
+    const dims = ["year", "tag", "type", "destination"] as const;
+    type Dim = typeof dims[number];
 
-  items.forEach(el => {
-    let visible = true;
+    const params = new URLSearchParams(window.location.search);
 
-    const tags = JSON.parse(el.dataset.tags || "[]");
-    const type = (el.dataset.type || "").toLowerCase();
-    const dests = JSON.parse(el.dataset.destination || "[]");
+    const active: Record<Dim, Set<string>> = {
+      year:        new Set(params.getAll("year")),
+      tag:         new Set(params.getAll("tag")),
+      type:        new Set(params.getAll("type")),
+      destination: new Set(params.getAll("destination")),
+    };
 
-    // TAG (multi-select OR)
-    if (active.tags.length && !active.tags.some(t => tags.includes(t))) {
-      visible = false;
+    // ── sync URL without reloading ────────────────────────────────────────
+
+    function syncUrl() {
+      const p = new URLSearchParams();
+      for (const dim of dims) {
+        for (const val of active[dim]) p.append(dim, val);
+      }
+      const qs = p.toString();
+      history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
     }
 
-    // TYPE
-    if (visible && active.types.length && !active.types.includes(type)) {
-      visible = false;
+    // ── apply filters to articles + year groups ───────────────────────────
+
+    function applyFilters() {
+      const hasActive = dims.some(d => active[d].size > 0);
+
+      // show/hide articles
+      articles.forEach(el => {
+        const year  = el.dataset.year ?? "";
+        const tags  = JSON.parse(el.dataset.tags  ?? "[]") as string[];
+        const type  = el.dataset.type  ?? "";
+        const dests = JSON.parse(el.dataset.destination ?? "[]") as string[];
+
+        let visible = true;
+
+        if (active.year.size        && !active.year.has(year))                   visible = false;
+        if (visible && active.tag.size   && !tags.some(t  => active.tag.has(t))) visible = false;
+        if (visible && active.type.size  && !active.type.has(type))              visible = false;
+        if (visible && active.destination.size && !dests.some(d => active.destination.has(d))) visible = false;
+
+        el.hidden = !visible;
+      });
+
+      // show/hide year groups + update counts
+      yearGroups.forEach(group => {
+        const groupArticles = group.querySelectorAll<HTMLElement>("article");
+        const visibleItems  = [...groupArticles].filter(a => !a.hidden);
+
+        group.hidden = visibleItems.length === 0;
+
+        const countEl = group.querySelector("[data-count]");
+        if (countEl) {
+          countEl.textContent = `${visibleItems.length} ${visibleItems.length === 1 ? "post" : "posts"}`;
+        }
+      });
+
+      // sync pill pressed state
+      pills.forEach(pill => {
+        const dim = pill.dataset.filterDim as Dim;
+        const val = pill.dataset.filterVal ?? "";
+        const pressed = active[dim]?.has(val) ?? false;
+        pill.setAttribute("aria-pressed", String(pressed));
+      });
+
+      // show/hide clear button
+      if (clear) clear.hidden = !hasActive;
     }
 
-    // DEST
-    if (visible && active.dests.length && !active.dests.some(d => dests.includes(d))) {
-      visible = false;
-    }
+    // ── pill click → toggle Set → sync → apply ───────────────────────────
 
-    el.hidden = !visible;
-  });
+    pills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        const dim = pill.dataset.filterDim as Dim;
+        const val = pill.dataset.filterVal ?? "";
+        if (!active[dim]) active[dim] = new Set();
+        active[dim].has(val) ? active[dim].delete(val) : active[dim].add(val);
+        syncUrl();
+        applyFilters();
+      });
+    });
 
-  // update grouped counts
-  root.querySelectorAll("[data-year]").forEach(group => {
-    const items = group.querySelectorAll("article");
-    const visibleItems = [...items].filter(i => !i.hidden);
+    // ── clear all ─────────────────────────────────────────────────────────
 
-    group.hidden = visibleItems.length === 0;
+    clear?.addEventListener("click", () => {
+      for (const dim of dims) active[dim].clear();
+      syncUrl();
+      applyFilters();
+    });
 
-    const countEl = group.querySelector("[data-count]");
-    if (countEl) {
-      countEl.textContent = `${visibleItems.length} ${
-        visibleItems.length === 1 ? "post" : "posts"
-      }`;
-    }
-  });
+    // ── initial apply (page load / back-forward with URL params) ─────────
 
-  // highlight active tags
-  document.querySelectorAll("[data-filter-tag]").forEach(el => {
-    const key = el.dataset.filterTag.toLowerCase();
-
-    if (active.tags.includes(key)) {
-      el.classList.add("text-content", "font-bold", "bg-elevated", "badge");
-    }
-  });
-
-  // highlight "All"
-  if (active.tags.length === 0) {
-    document.querySelector("[data-filter-all]")?.classList.add(
-      "text-content", "font-bold", "bg-elevated", "badge");
+    applyFilters();
   }
+
+  initFilter();
+  document.addEventListener("astro:after-swap", initFilter);
 </script>

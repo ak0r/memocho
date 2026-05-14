@@ -1,8 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { type AnyPost, getPublishedPosts, getRelatedPosts, getSeriesPosts, calculateReadingTime, getPostSlug } from "@/utils/content.utils";
+import { type Post, getAllPosts, getRelatedPosts, getSeriesPosts, getPostSlug } from "@/utils/content.utils";
 import { getGalleryImages, getCoverImage } from '@/utils/image.utils';
+import { calculateReadingTime } from "@/utils/text.utils";
 import { siteConfig } from "@/site.config";
 import PageHeader from "@/components/PageHeader.astro";
 import PostMeta from "@/components/PostMeta.astro";
@@ -18,11 +19,11 @@ import SEO from "@/components/SEO.astro";
 import SchemaOrg from "@/components/SchemaOrg.astro";
 
 interface Props {
-  entry: AnyPost;
+  entry: Post;
 }
 
 const { entry } = Astro.props;
-const isTravel = entry.collection === 'travels';
+const isTravel = entry.collection === 'posts';
 
 const {
   title,
@@ -36,12 +37,12 @@ const {
 } = entry.data;
 
 // Travel-only fields
-const countries = isTravel ? (entry as CollectionEntry<'travels'>).data.countries : undefined;
-const region    = isTravel ? (entry as CollectionEntry<'travels'>).data.region    : undefined;
-const places    = isTravel ? (entry as CollectionEntry<'travels'>).data.places    : undefined;
+const countries = isTravel ? (entry as CollectionEntry<'posts'>).data.countries : undefined;
+const region    = isTravel ? (entry as CollectionEntry<'posts'>).data.region    : undefined;
+const places    = isTravel ? (entry as CollectionEntry<'posts'>).data.places    : undefined;
 
 const placesLabel = places?.join(', ') ?? '';
-const allPosts      = await getPublishedPosts();
+const allPosts      = await getAllPosts();
 const related       = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
 const seriesPosts   = series ? await getSeriesPosts(series) : [];
 const readTime      = calculateReadingTime(entry.body ?? "").text;

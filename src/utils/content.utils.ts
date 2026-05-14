@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
+import { slugify } from "./text.utils";
 
 const isDev = import.meta.env.DEV;
 const isProd = import.meta.env.PROD;
@@ -10,9 +11,7 @@ const isProd = import.meta.env.PROD;
  * A post is either a travel or tech collection entry.
  * Using a union lets us pass either to shared helpers.
  */
-export type TravelPost = CollectionEntry<"travels">;
-export type TechPost   = CollectionEntry<"tech">;
-export type AnyPost    = TravelPost | TechPost;
+export type Post = CollectionEntry<"posts">;
 export type TagInfo = {
   key: string;
   label: string;
@@ -38,42 +37,23 @@ function isDraftVisible(draft: boolean): boolean {
 
 // ── Post queries ───────────────────────────────────────────────────────────────
 
-export async function getTravelPosts(): Promise<TravelPost[]> {
-  const posts = await getCollection("travels", ({ data }) =>
+export async function getAllPosts(): Promise<Post[]> {
+  const allPosts = await getCollection("posts", ({ data }) =>
     isDraftVisible(data.draft)
   );
-  return posts.sort(
+  return allPosts.sort(
     (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
   );
 }
 
-export async function getTechPosts(): Promise<TechPost[]> {
-  const posts = await getCollection("tech", ({ data }) =>
-    isDraftVisible(data.draft)
-  );
-  return posts.sort(
-    (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
-  );
-}
-
-/**
- * All published posts from both collections, sorted by date descending.
- * Used for PostNav, related posts, RSS, OG images.
- */
-export async function getPublishedPosts(): Promise<AnyPost[]> {
-  const [travel, tech] = await Promise.all([getTravelPosts(), getTechPosts()]);
-  return [...travel, ...tech].sort(
-    (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
-  );
-}
 
 // ── Grouping ───────────────────────────────────────────────────────────────────
 
 export function groupPostsByYear(
-  posts: AnyPost[]
-): Map<number, AnyPost[]> {
-  const groups = new Map<number, AnyPost[]>();
-  for (const post of posts) {
+  entries: Post[]
+): Map<number, Post[]> {
+  const groups = new Map<number, Post[]>();
+  for (const post of entries) {
     const year = new Date(post.data.published).getFullYear();
     if (!groups.has(year)) groups.set(year, []);
     groups.get(year)!.push(post);
@@ -81,15 +61,15 @@ export function groupPostsByYear(
   return new Map([...groups.entries()].sort((a, b) => b[0] - a[0]));
 }
 
-export async function getPostsByYear(): Promise<Map<number, AnyPost[]>> {
-  const posts = await getPublishedPosts();
+export async function getPostsByYear(): Promise<Map<number, Post[]>> {
+  const posts = await getAllPosts();
   return groupPostsByYear(posts);
 }
 
 export function getPostsGroupedByYear(
-  entries: AnyPost[]
-): [string, AnyPost[]][] {
-  const grouped = entries.reduce<Record<string, AnyPost[]>>((acc, entry) => {
+  entries: Post[]
+): [string, Post[]][] {
+  const grouped = entries.reduce<Record<string, Post[]>>((acc, entry) => {
     const year = entry.data.published.getFullYear().toString();
     (acc[year] ??= []).push(entry);
     return acc;
@@ -106,26 +86,14 @@ export function getPostsGroupedByYear(
   );
 }
 
-// ── Normalisation ──────────────────────────────────────────────────────────────
-
-/**
- * Normalise a country name to a destination collection id.
- * Mirrors what Astro's glob loader does to filenames.
- *
- * "India"     → "india"
- * "Sri Lanka" → "sri-lanka"
- */
-export function toDestinationId(value: string): string {
-  return value.toLowerCase().replace(/\s+/g, "-");
-}
 
 /**
  * Extract normalised destination ids from a travel post's countries field.
  */
-export function getCountryIds(post: TravelPost): string[] {
+export function getCountryIds(post: Post): string[] {
   const countries = post.data.countries;
   if (!countries?.length) return [];
-  return countries.map((c) => toDestinationId(c));
+  return countries.map((c) => slugify(c));
 }
 
 /**
@@ -133,7 +101,7 @@ export function getCountryIds(post: TravelPost): string[] {
  * "2026-01-26-self-hosting/replacing-google-photos" → "replacing-google-photos"
  * "rajgad-trek" → "rajgad-trek"
  */
-export function getPostSlug(post: AnyPost): string {
+export function getPostSlug(post: Post): string {
   return post.id.includes('/') ? post.id.split('/').pop()! : post.id;
 }
 
@@ -144,10 +112,9 @@ export function getPostSlug(post: AnyPost): string {
  * Derive the canonical URL for any post.
  * Uses post.collection — no category field needed.
  */
-export function getPostUrl(post: AnyPost): string {
+export function getPostUrl(post: Post): string {
   const slug = getPostSlug(post);
-  if (post.collection === "tech") return `/tech/${slug}`;
-  return `/travels/${slug}`;
+  return `/${slug}`;
 }
 
 // ── Series ─────────────────────────────────────────────────────────────────────
@@ -156,11 +123,11 @@ export function getPostUrl(post: AnyPost): string {
  * Posts in a series — searches both collections, sorted by order ascending.
  * Series can span travel and tech (e.g. a homelab series under tech).
  */
-export async function getSeriesPosts(series: string): Promise<AnyPost[]> {
-  const all = await getPublishedPosts();
+export async function getSeriesPosts(series: string): Promise<Post[]> {
+  const all = await getAllPosts();
   return all
     .filter((p) => p.data.series === series)
-    .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+    .sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0));
 }
 
 
@@ -176,21 +143,21 @@ export async function getSeriesPosts(series: string): Promise<AnyPost[]> {
  *   shared tag only              → 1
  */
 export function getRelatedPosts(
-  current: AnyPost,
-  allPosts: AnyPost[],
+  current: Post,
+  allPosts: Post[],
   count: number
-): AnyPost[] {
+): Post[] {
   const currentTags      = current.data.tags ?? [];
   const currentCol       = current.collection;
-  const currentCountries = current.collection === 'travels'
-    ? getCountryIds(current as TravelPost)
+  const currentCountries = current.collection === 'posts'
+    ? getCountryIds(current as Post)
     : [];
 
   const scored = allPosts
     .filter((p) => p.id !== current.id || p.collection !== current.collection)
     .map((post) => {
-      const postCountries = post.collection === 'travels'
-        ? getCountryIds(post as TravelPost)
+      const postCountries = post.collection === 'posts'
+        ? getCountryIds(post as Post)
         : [];
       const sharedCountry =
         currentCountries.length > 0 &&
@@ -233,48 +200,9 @@ export function getRelatedPosts(
   return scored;
 }
 
-// ── Reading time ───────────────────────────────────────────────────────────────
-
-export interface ReadingTime {
-  text: string;
-  minutes: number;
-  time: number;
-  words: number;
-}
-
-export function calculateReadingTime(
-  content: string,
-  wordsPerMinute = 200
-): ReadingTime {
-  if (!content || typeof content !== "string") {
-    return { text: "1 min read", minutes: 1, time: 60000, words: 0 };
-  }
-
-  const plainText = content
-    .replace(/^---\n[\s\S]*?\n---\n/, "")
-    .replace(/!\[.*?\]\(.*?\)/g, "")
-    .replace(/\[.*?\]\(.*?\)/g, "$1")
-    .replace(/`{1,3}.*?`{1,3}/gs, "")
-    .replace(/#{1,6}\s+/g, "")
-    .replace(/[*_~`]/g, "")
-    .replace(/\n+/g, " ")
-    .trim();
-
-  const words     = plainText.split(/\s+/).filter((w) => w.length > 0);
-  const wordCount = words.length;
-  const minutes   = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
-
-  return {
-    text: `${minutes} min read`,
-    minutes,
-    time: minutes * 60 * 1000,
-    words: wordCount,
-  };
-}
-
 // ── Tag Queries ───────────────────────────────────────────────────────────────
 
-function buildTagList(posts: AnyPost[]): TagInfo[] {
+function buildTagList(posts: Post[]): TagInfo[] {
   const map = new Map<string, TagInfo>();
 
   const normalize = (t: string) => t.trim().toLowerCase();
@@ -296,55 +224,13 @@ function buildTagList(posts: AnyPost[]): TagInfo[] {
   );
 }
 
-async function getTagsFrom(source: () => Promise<AnyPost[]>) {
+async function getTagsFrom(source: () => Promise<Post[]>) {
   return buildTagList(await source());
 }
 
-export const getTravelTags = () => getTagsFrom(getTravelPosts);
-export const getTechTags   = () => getTagsFrom(getTechPosts);
-export const getAllTags    = () => getTagsFrom(getPublishedPosts);
+export const getAllTags    = () => getTagsFrom(getAllPosts);
 
-// ── Destination queries ────────────────────────────────────────────────────────
 
-export async function getAllDestinations(): Promise<
-  CollectionEntry<"destinations">[]
-> {
-  const destinations = await getCollection("destinations");
-  return destinations.sort((a, b) =>
-    a.data.title.localeCompare(b.data.title)
-  );
-}
-
-export async function getPlacesByDestination(): Promise<Map<string, string[]>> {
-  const posts = await getTravelPosts();
-  const map   = new Map<string, string[]>();
-
-  for (const post of posts) {
-    for (const id of getCountryIds(post)) {
-      if (!map.has(id)) map.set(id, []);
-      const existing = map.get(id)!;
-      for (const place of post.data.places ?? []) {
-        if (!existing.includes(place)) existing.push(place);
-      }
-    }
-  }
-
-  for (const [id, places] of map) {
-    map.set(id, [...places].sort((a, b) => a.localeCompare(b)));
-  }
-
-  return map;
-}
-
-export async function getPostCountByDestination(): Promise<Map<string, number>> {
-  const posts = await getTravelPosts();
-  const map   = new Map<string, number>();
-
-  for (const post of posts) {
-    for (const id of getCountryIds(post)) {
-      map.set(id, (map.get(id) ?? 0) + 1);
-    }
-  }
-
-  return map;
-}
+export const getDistinctYears = (posts: Post[]): number[] =>
+  [...new Set(posts.map(p => p.data.published.getFullYear()))]
+    .sort((a, b) => b - a);

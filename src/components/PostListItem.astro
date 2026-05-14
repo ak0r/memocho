@@ -1,10 +1,10 @@
 ---
-import { type AnyPost, collectionColors, getCountryIds } from "@/utils/content.utils";
+import { type Post, getCountryIds } from "@/utils/content.utils";
 import { formatDate, titleify, type DateVariant } from "@/utils/text.utils";
 import Icon from "./Icon.astro";
 
 interface Props {
-  post: AnyPost;
+  post: Post;
   enableFilter?: boolean;
   variant?: string;
   dateFormat?: DateVariant;
@@ -12,103 +12,48 @@ interface Props {
 
 const { post, enableFilter = false, variant = "default", dateFormat = "archive" } = Astro.props;
 const normalize = (v?: string) => v?.toLowerCase();
-const collectionLabel = titleify(post.collection);
-const collectionBadgeClass =
-  post.collection === "travels"
-    ? "badge-travel"
-    : "badge-tech";
+// const collectionLabel = titleify(post.collection);
+// const collectionBadgeClass =
+//   post.collection === "travels"
+//     ? "badge-travel"
+//     : "badge-tech";
 ---
 
 <article
-  class="
-    group
-    flex flex-col gap-1
-    py-3 px-2 -mx-2 mb-1
-    rounded-md
-    transition
-    hover:bg-surface/70
-
-    md:flex-row
-    md:items-center
-    md:gap-4
-    md:py-2
-  "
+  class="group flex flex-col gap-1 py-3 px-2 -mx-2 mb-1 rounded-md transition hover:bg-surface/70
+    md:flex-row md:items-center md:gap-4 md:py-2"
+  data-year={enableFilter ? post.data.published.getFullYear() : undefined} 
   data-type={enableFilter ? normalize(post.data.type) : undefined} 
   data-tags={enableFilter ? JSON.stringify((post.data.tags ?? []).map(normalize)) : undefined} 
   data-destination={enableFilter ? JSON.stringify(getCountryIds(post).map(normalize)) : undefined}
 >
 
-  {/* Meta */}
-  <div
-    class="
-      flex items-center gap-2
-      text-xs text-minimal
-      shrink-0
-
-      md:text-sm
-    "
-  >
-
+  <div class="flex items-center gap-2 text-xs text-minimal shrink-0 md:text-sm">
     <time
       datetime={formatDate(post.data.published, 'seo')}
-      class="
-        font-mono
-        tabular-nums
-
-        md:min-w-[5ch]
-      "
-    >
+      class="font-mono tabular-nums md:min-w-[5ch]">
       {formatDate(post.data.published, dateFormat)}
     </time>
-
     {post.data.draft && (
       <span class="badge bg-fig/20 text-fig">
         Draft
       </span>
     )}
-
     <!-- {variant === "home" && (
       <span class:list={["badge", collectionBadgeClass]}>
         {collectionLabel}
       </span>
     )} -->
-
   </div>
-
   {/* Title */}
   <a
-    href={`/${post.collection}/${post.id}`}
-    class="
-      min-w-0
-      flex-1
-
-      text-sm text-content
-      transition-colors
-      group-hover:text-brand
-
-      md:truncate
-    "
-  >
+    href={`/${post.id}`}
+    class="min-w-0 flex-1 text-sm text-content transition-colors group-hover:text-brand md:truncate">
     {post.data.title}
   </a>
 
   {/* Desktop arrow */}
-  <div
-    class="
-      hidden md:block
-
-      text-minimal
-      opacity-0
-      -translate-x-1
-
-      transition-all
-      duration-200
-
-      group-hover:opacity-100
-      group-hover:translate-x-0
-    "
-  >
+  <div class="hidden md:block text-minimal opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0">
     <Icon name="arrow-right" size={16} />
   </div>
-
 </article>

@@ -3,10 +3,10 @@ import SEO from "@/components/SEO.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import PageHeader from "@/components/PageHeader.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
-import { type AnyPost } from "@/utils/content.utils";
+import { type Post } from "@/utils/content.utils";
 
 interface Props {
-  entry?: AnyPost;
+  entry?: Post;
   title?: string;
   description?: string;
   showBreadcrumb?: boolean;

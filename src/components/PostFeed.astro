@@ -10,14 +10,14 @@
  * - card    → visual card grid
  */
 
-import { type AnyPost, getPostsGroupedByYear } from "@/utils/content.utils";
+import { type Post, getPostsGroupedByYear } from "@/utils/content.utils";
 
 import SectionHeader from "./SectionHeader.astro";
 import PostListItem from "./PostListItem.astro";
 import PostCard from "./PostCard.astro";
 
 interface Props {
-  posts: AnyPost[];
+  posts: Post[];
 
   sectionTitle?: string;
   sectionDesc?: string;
@@ -47,36 +47,22 @@ const groupedEntries = isArchive
   ? getPostsGroupedByYear(posts)
   : [];
 ---
-
 <section id={listId} class="post-feed mb-8">
-
   <SectionHeader
     title={sectionTitle}
     subheading={sectionDesc}
   />
-
-  {/* =========================================================================
-      ARCHIVE
-     ========================================================================= */}
-
   {isArchive ? (
-
     groupedEntries.map(([year, yearPosts]) => (
-
       <div
-        class="flex flex-col"
-        data-year={enableFilter ? year : undefined}
+        class="flex flex-col mb-8"
+        data-year-group={enableFilter ? year : undefined}
       >
-
-        {/* Year heading */}
         <div class="flex items-center gap-2 mb-2">
-
           <h3 class="text-muted text-xl mb-0 shrink-0">
             {year}
           </h3>
-
           <div class="flex-1 divider" />
-
           <span
             data-count
             class="
@@ -89,12 +75,8 @@ const groupedEntries = isArchive
             {" "}
             {yearPosts.length === 1 ? "post" : "posts"}
           </span>
-
         </div>
-
-        {/* Posts */}
         <div role="list">
-
           {yearPosts.map((post) => (
             <PostListItem
               post={post}
@@ -102,18 +84,10 @@ const groupedEntries = isArchive
               dateFormat="archive"
             />
           ))}
-
         </div>
-
       </div>
-
     ))
-
   ) : (
-
-    /* =======================================================================
-       COMPACT + CARD
-       ======================================================================= */
 
     <div
       class:list={[
@@ -127,23 +101,15 @@ const groupedEntries = isArchive
       {posts.map((post) => (
 
         isCard ? (
-
           <PostCard post={post} />
-
         ) : (
-
           <PostListItem
             post={post}
             enableFilter={enableFilter}
             dateFormat="post"
           />
-
         )
-
       ))}
-
     </div>
-
   )}
-
 </section>

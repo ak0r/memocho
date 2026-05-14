@@ -1,36 +1,37 @@
 ---
 /**
- * /tech
+ * /travels/
  *
- * All tech posts with client-side filtering.
- * Filter dimensions: tag
- * URL state: /tech/?tag=homelab
+ * All travel posts with client-side filtering.
+ * Filter dimensions: type, tag, destination
+ * URL state: /travel/?type=story&tag=hiking&destination=india
  *
  * Year groupings are rendered at build time.
  * The filter script hides individual items but also hides year headings
  * when all posts in that year are filtered out.
  */
 
-import { getTechPosts, getTechTags } from "@/utils/content.utils";
 import PageLayout from "@/layouts/PageLayout.astro";
+import { getAllPosts, getAllTags, getDistinctYears } from "@/utils/content.utils";
 import PostFeed from "@/components/PostFeed.astro";
 import PostFilter from "@/components/PostFilter.astro";
 
-const allPosts = await getTechPosts();
-const allTags = await getTechTags();
+const allPosts = await getAllPosts();
+const allTags = await getAllTags();
+const allYears = getDistinctYears(allPosts);
+
 ---
 <PageLayout 
-	title="Tech Notes" 
-	description="Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way."
+	title="Travel Stories" 
+	description="Travel stories from across India and the world — forts, roads, cities, and everything in between."
 >
-	
+
 	{allPosts.length > 0 ? (
 		<>
-			<PostFilter 
-				listId="tech-list"
+			<PostFilter
 				tags={allTags}
+				years={allYears}
 			/>
-
 			<PostFeed
 				posts={allPosts}
 				variant="archive"

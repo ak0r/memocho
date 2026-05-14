@@ -11,9 +11,7 @@
  */
 
 import type { CollectionEntry } from "astro:content";
-
 import { siteConfig } from "@/site.config";
-
 import type { Crumb } from "@/utils/breadcrumb.utils";
 import { getPostUrl } from "@/utils/content.utils";
 
@@ -21,9 +19,7 @@ import { getPostUrl } from "@/utils/content.utils";
    TYPES
 ============================================================================ */
 
-type ContentEntry =
-  | CollectionEntry<"travels">
-  | CollectionEntry<"tech">;
+type ContentEntry = CollectionEntry<"posts">;
 
 type SchemaType =
   | "article"
@@ -32,11 +28,7 @@ type SchemaType =
 
 interface Props {
   type: SchemaType;
-
-  // article
   entry?: ContentEntry;
-
-  // breadcrumb
   crumbs?: Crumb[];
 }
 
@@ -119,38 +111,25 @@ function buildArticle(entry: ContentEntry) {
 
   return {
     "@context": "https://schema.org",
-
     "@type": "BlogPosting",
-
     headline: title,
-
     ...(description && {
       description,
     }),
-
     url: canonicalUrl,
-
     image: imageUrl,
-
     inLanguage: lang ?? "en",
-
     datePublished: published.toISOString(),
-
     dateModified:
       (updated ?? published).toISOString(),
-
     ...(tags?.length && {
       keywords: tags.join(", "),
     }),
-
     ...(section && {
       articleSection: section,
     }),
-
     author: person,
-
     publisher,
-
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": canonicalUrl,
@@ -162,21 +141,14 @@ function buildBreadcrumb(crumbs: Crumb[]) {
 
   return {
     "@context": "https://schema.org",
-
     "@type": "BreadcrumbList",
-
     itemListElement: crumbs.map((crumb, index) => {
-
       const isLast =
         index === crumbs.length - 1;
-
       return {
         "@type": "ListItem",
-
         position: index + 1,
-
         name: crumb.title,
-
         // Google recommends omitting item on current page
         ...(!isLast && {
           item: new URL(
@@ -193,29 +165,19 @@ function buildWebsite() {
 
   return {
     "@context": "https://schema.org",
-
     "@type": "WebSite",
-
     "@id": `${siteUrl}/#website`,
-
     name: siteConfig.title,
-
     description: siteConfig.description,
-
     url: siteUrl,
-
     publisher,
-
     potentialAction: {
       "@type": "SearchAction",
-
       target: {
         "@type": "EntryPoint",
-
         urlTemplate:
           `${siteUrl}/search?q={search_term_string}`,
       },
-
       "query-input":
         "required name=search_term_string",
     },
