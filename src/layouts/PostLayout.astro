@@ -1,5 +1,4 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { type Post, getAllPosts, getRelatedPosts, getSeriesPosts, getPostSlug } from "@/utils/content.utils";
 import { getGalleryImages, getCoverImage } from '@/utils/image.utils';
@@ -13,7 +12,7 @@ import PostNavigation from "@/components/PostNavigation.astro";
 import PostFeed from "@/components/PostFeed.astro";
 import PostGallery from "@/components/PostGallery.astro";
 import GalleryInit from '@/components/GalleryInit.astro';
-import Breadcrumb from "@/components/Breadcrumb.astro"
+import Breadcrumb from "@/components/Breadcrumb.astro";
 import ImageWrapper from "@/components/ImageWrapper.astro";
 import SEO from "@/components/SEO.astro";
 import SchemaOrg from "@/components/SchemaOrg.astro";
@@ -23,7 +22,6 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const isTravel = entry.collection === 'posts';
 
 const {
   title,
@@ -33,31 +31,28 @@ const {
   tags,
   cover,
   series,
-  type = ''
+  type = '',
+  countries,
+  places,
 } = entry.data;
 
-// Travel-only fields
-const countries = isTravel ? (entry as CollectionEntry<'posts'>).data.countries : undefined;
-const region    = isTravel ? (entry as CollectionEntry<'posts'>).data.region    : undefined;
-const places    = isTravel ? (entry as CollectionEntry<'posts'>).data.places    : undefined;
-
 const placesLabel = places?.join(', ') ?? '';
-const allPosts      = await getAllPosts();
-const related       = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
-const seriesPosts   = series ? await getSeriesPosts(series) : [];
-const readTime      = calculateReadingTime(entry.body ?? "").text;
-const coverImage    = getCoverImage(cover);
+
+const allPosts    = await getAllPosts();
+const related     = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
+const seriesPosts = series ? await getSeriesPosts(series) : [];
+const readTime    = calculateReadingTime(entry.body ?? "").text;
+const coverImage  = getCoverImage(cover);
 const galleryImages = getGalleryImages(entry.filePath ?? '');
-const ogImage       = `/og/${entry.collection}/${getPostSlug(entry)}.png`;
 
-const currentIndex = allPosts.findIndex(
-  (p) => p.id === entry.id && p.collection === entry.collection
-);
+// OG image — flat route: /og/posts/[slug].png
+const ogImage = `/og/posts/${getPostSlug(entry)}.png`;
 
+const currentIndex = allPosts.findIndex((p) => p.id === entry.id);
 const prev = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : null;
-
 ---
+
 <BaseLayout>
   <SEO
     slot="seo"
@@ -74,7 +69,7 @@ const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : n
     entry={entry}
     slot="seo"
   />
-  
+
   <Fragment slot="header">
     <div class="flex flex-col gap-8">
 
@@ -89,34 +84,28 @@ const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : n
           />
         </PageHeader>
       </div>
-      
+
       {coverImage && (
         <section class="rounded-lg ring ring-border shadow-sm breakout">
-        <ImageWrapper 
-          src={coverImage} 
-          alt={title}
-        />
-      </section>
+          <ImageWrapper src={coverImage} alt={title} />
+        </section>
       )}
 
-      {isTravel && (
+      {(placesLabel || type) && (
         <PostContext type={type} location={placesLabel} />
       )}
+
       <div class="divider"></div>
     </div>
   </Fragment>
-  
-  <aside data-pagefind-body>
 
-    <!-- Pagefind Meta entries -->
+  <aside data-pagefind-body>
     <meta data-pagefind-meta="title[content]" content={title} />
     <meta data-pagefind-sort="date[content]" content={published.toISOString()} />
     <meta data-pagefind-filter="collection[content]" content={entry.collection} />
-    {
-      tags?.map((tag) => (
-        <meta data-pagefind-filter="tag[content]" content={tag} />
-      ))
-    }
+    {tags?.map((tag) => (
+      <meta data-pagefind-filter="tag[content]" content={tag} />
+    ))}
 
     <section class="post-content border-border" role="article">
       <slot />
@@ -128,18 +117,16 @@ const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : n
 
     <PostTaxonomy {tags} />
   </aside>
-  
-  {/* NAVIGATION SLOT */}
+
   <Fragment slot="navigation">
     <PostNavigation
-      current={entry} 
+      current={entry}
       seriesPosts={seriesPosts}
-      prev={prev} 
+      prev={prev}
       next={next}
     />
   </Fragment>
 
-  {/* AFTER SLOT */}
   <Fragment slot="after">
     {related.length > 0 && (
       <PostFeed

@@ -17,7 +17,7 @@ const isSeries = Boolean(current.data.series) && seriesPosts.length > 0;
 const sortedSeries = isSeries
   ? [...seriesPosts].sort(
       (a, b) =>
-        (a.data.order ?? 0) - (b.data.order ?? 0)
+        (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0)
     )
   : [];
 ---

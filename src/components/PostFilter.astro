@@ -7,8 +7,12 @@
  * true multi-select across all dimensions.
  *
  * Expects PostFeed to render articles with:
- *   data-year, data-tags (JSON array), data-type, data-destination (JSON array)
+ *   data-year, data-tags (JSON array), data-type, data-destination (JSON array),
+ *   data-theme (JSON array), data-country (JSON array)
  * and year groups with data-year-group + data-count.
+ *
+ * Active dimensions are wired in archive.astro by passing the relevant prop.
+ * Unused props render nothing — adding a new dimension is zero-cost.
  */
 
 import { type TagInfo } from '@/utils/content.utils';
@@ -19,6 +23,8 @@ interface Props {
   types?:        string[];
   destinations?: string[];
   years?:        number[];
+  themes?:       string[];   // post.data.theme[]  — future
+  countries?:    string[];   // post.data.countries[] — future
 }
 
 const {
@@ -26,9 +32,11 @@ const {
   types        = [],
   destinations = [],
   years        = [],
+  themes       = [],
+  countries    = [],
 } = Astro.props;
 
-// Pill classes — inactive / active. Active state is toggled by JS at runtime.
+// Pill classes — active state applied at runtime via aria-pressed
 const pill = "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer text-muted border border-current/20 hover:text-content hover:border-current/40 aria-pressed:bg-elevated aria-pressed:text-content aria-pressed:border-transparent";
 ---
 
@@ -123,6 +131,44 @@ const pill = "inline-flex items-center px-3 py-1 rounded-full text-xs font-mediu
       </div>
     )}
 
+    {/* THEME */}
+    {themes.length > 0 && (
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
+        <span class="text-xs font-mono text-minimal w-24 shrink-0 pt-1">Theme</span>
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by theme">
+          {themes.map((t) => (
+            <button
+              class={pill}
+              data-filter-dim="theme"
+              data-filter-val={t.toLowerCase().trim()}
+              aria-pressed="false"
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* COUNTRY */}
+    {countries.length > 0 && (
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
+        <span class="text-xs font-mono text-minimal w-24 shrink-0 pt-1">Country</span>
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by country">
+          {countries.map((c) => (
+            <button
+              class={pill}
+              data-filter-dim="country"
+              data-filter-val={c.toLowerCase().trim()}
+              aria-pressed="false"
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+
   </nav>
 </section>
 
@@ -140,7 +186,7 @@ const pill = "inline-flex items-center px-3 py-1 rounded-full text-xs font-mediu
 
     // ── state: one Set per dimension, seeded from URL ─────────────────────
 
-    const dims = ["year", "tag", "type", "destination"] as const;
+    const dims = ["year", "tag", "type", "destination", "theme", "country"] as const;
     type Dim = typeof dims[number];
 
     const params = new URLSearchParams(window.location.search);
@@ -150,13 +196,16 @@ const pill = "inline-flex items-center px-3 py-1 rounded-full text-xs font-mediu
       tag:         new Set(params.getAll("tag")),
       type:        new Set(params.getAll("type")),
       destination: new Set(params.getAll("destination")),
+      theme:       new Set(params.getAll("theme")),
+      country:     new Set(params.getAll("country")),
     };
 
-    // ── sync URL without reloading ────────────────────────────────────────
+    // ── sync URL — only write dims that have active values ────────────────
 
     function syncUrl() {
       const p = new URLSearchParams();
       for (const dim of dims) {
+        if (active[dim].size === 0) continue;
         for (const val of active[dim]) p.append(dim, val);
       }
       const qs = p.toString();
@@ -170,17 +219,21 @@ const pill = "inline-flex items-center px-3 py-1 rounded-full text-xs font-mediu
 
       // show/hide articles
       articles.forEach(el => {
-        const year  = el.dataset.year ?? "";
-        const tags  = JSON.parse(el.dataset.tags  ?? "[]") as string[];
-        const type  = el.dataset.type  ?? "";
-        const dests = JSON.parse(el.dataset.destination ?? "[]") as string[];
+        const year    = el.dataset.year    ?? "";
+        const tags    = JSON.parse(el.dataset.tags        ?? "[]") as string[];
+        const type    = el.dataset.type    ?? "";
+        const dests   = JSON.parse(el.dataset.destination ?? "[]") as string[];
+        const themes  = JSON.parse(el.dataset.theme       ?? "[]") as string[];
+        const countries = JSON.parse(el.dataset.country   ?? "[]") as string[];
 
         let visible = true;
 
-        if (active.year.size        && !active.year.has(year))                   visible = false;
-        if (visible && active.tag.size   && !tags.some(t  => active.tag.has(t))) visible = false;
-        if (visible && active.type.size  && !active.type.has(type))              visible = false;
-        if (visible && active.destination.size && !dests.some(d => active.destination.has(d))) visible = false;
+        if (active.year.size        && !active.year.has(year))                       visible = false;
+        if (visible && active.tag.size         && !tags.some(t    => active.tag.has(t)))         visible = false;
+        if (visible && active.type.size        && !active.type.has(type))                        visible = false;
+        if (visible && active.destination.size && !dests.some(d   => active.destination.has(d))) visible = false;
+        if (visible && active.theme.size       && !themes.some(t  => active.theme.has(t)))       visible = false;
+        if (visible && active.country.size     && !countries.some(c => active.country.has(c)))   visible = false;
 
         el.hidden = !visible;
       });
@@ -200,8 +253,8 @@ const pill = "inline-flex items-center px-3 py-1 rounded-full text-xs font-mediu
 
       // sync pill pressed state
       pills.forEach(pill => {
-        const dim = pill.dataset.filterDim as Dim;
-        const val = pill.dataset.filterVal ?? "";
+        const dim    = pill.dataset.filterDim as Dim;
+        const val    = pill.dataset.filterVal ?? "";
         const pressed = active[dim]?.has(val) ?? false;
         pill.setAttribute("aria-pressed", String(pressed));
       });

@@ -12,18 +12,19 @@
  */
 
 import PageLayout from "@/layouts/PageLayout.astro";
-import { getAllPosts, getAllTags, getDistinctYears } from "@/utils/content.utils";
+import { getAllPosts, getAllTags, getDistinctYears, getDistinctCountries, getDistinctThemes  } from "@/utils/content.utils";
 import PostFeed from "@/components/PostFeed.astro";
 import PostFilter from "@/components/PostFilter.astro";
 
 const allPosts = await getAllPosts();
 const allTags = await getAllTags();
 const allYears = getDistinctYears(allPosts);
-
+const allCountries = getDistinctCountries(allPosts);
+const allThemes = getDistinctThemes(allPosts);
 ---
 <PageLayout 
-	title="Travel Stories" 
-	description="Travel stories from across India and the world — forts, roads, cities, and everything in between."
+	title="Archive" 
+	description="Archive of stories related Systems and Streets"
 >
 
 	{allPosts.length > 0 ? (
@@ -31,6 +32,8 @@ const allYears = getDistinctYears(allPosts);
 			<PostFilter
 				tags={allTags}
 				years={allYears}
+				// countries={allCountries}
+				themes={allThemes}
 			/>
 			<PostFeed
 				posts={allPosts}

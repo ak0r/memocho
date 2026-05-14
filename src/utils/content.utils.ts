@@ -3,17 +3,12 @@ import type { CollectionEntry } from "astro:content";
 import { slugify } from "./text.utils";
 
 const isDev = import.meta.env.DEV;
-const isProd = import.meta.env.PROD;
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-/**
- * A post is either a travel or tech collection entry.
- * Using a union lets us pass either to shared helpers.
- */
 export type Post = CollectionEntry<"posts">;
 export type TagInfo = {
-  key: string;
+  key:   string;
   label: string;
   count: number;
 };
@@ -21,12 +16,12 @@ export type TagInfo = {
 export const collectionColors = {
   tech: {
     text: "var(--ks-sky)",
-    bg: "var(--ks-heather)"
+    bg:   "var(--ks-heather)",
   },
   travels: {
     text: "var(--ks-olive)",
-    bg: "var(--ks-cactus)"
-  }
+    bg:   "var(--ks-cactus)",
+  },
 };
 
 // ── Draft filter ───────────────────────────────────────────────────────────────
@@ -37,34 +32,25 @@ function isDraftVisible(draft: boolean): boolean {
 
 // ── Post queries ───────────────────────────────────────────────────────────────
 
+// 3.4: Module-level cache — getAllPosts() is called multiple times per build
+// (PostLayout: related posts, series, prev/next). One getCollection() call total.
+let _postsCache: Post[] | null = null;
+
 export async function getAllPosts(): Promise<Post[]> {
-  const allPosts = await getCollection("posts", ({ data }) =>
+  if (_postsCache) return _postsCache;
+
+  const all = await getCollection("posts", ({ data }) =>
     isDraftVisible(data.draft)
   );
-  return allPosts.sort(
+
+  _postsCache = all.sort(
     (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
   );
-}
 
+  return _postsCache;
+}
 
 // ── Grouping ───────────────────────────────────────────────────────────────────
-
-export function groupPostsByYear(
-  entries: Post[]
-): Map<number, Post[]> {
-  const groups = new Map<number, Post[]>();
-  for (const post of entries) {
-    const year = new Date(post.data.published).getFullYear();
-    if (!groups.has(year)) groups.set(year, []);
-    groups.get(year)!.push(post);
-  }
-  return new Map([...groups.entries()].sort((a, b) => b[0] - a[0]));
-}
-
-export async function getPostsByYear(): Promise<Map<number, Post[]>> {
-  const posts = await getAllPosts();
-  return groupPostsByYear(posts);
-}
 
 export function getPostsGroupedByYear(
   entries: Post[]
@@ -86,9 +72,10 @@ export function getPostsGroupedByYear(
   );
 }
 
+// ── Destination helpers ────────────────────────────────────────────────────────
 
 /**
- * Extract normalised destination ids from a travel post's countries field.
+ * Extract normalised destination ids from a post's countries field.
  */
 export function getCountryIds(post: Post): string[] {
   const countries = post.data.countries;
@@ -96,32 +83,28 @@ export function getCountryIds(post: Post): string[] {
   return countries.map((c) => slugify(c));
 }
 
+// ── URL / slug helpers ─────────────────────────────────────────────────────────
+
 /**
  * Extract slug from a post id — strips folder prefix.
  * "2026-01-26-self-hosting/replacing-google-photos" → "replacing-google-photos"
  * "rajgad-trek" → "rajgad-trek"
  */
 export function getPostSlug(post: Post): string {
-  return post.id.includes('/') ? post.id.split('/').pop()! : post.id;
+  return post.id.includes("/") ? post.id.split("/").pop()! : post.id;
 }
 
-
-// ── URL builder ────────────────────────────────────────────────────────────────
-
 /**
- * Derive the canonical URL for any post.
- * Uses post.collection — no category field needed.
+ * Canonical URL for any post.
  */
 export function getPostUrl(post: Post): string {
-  const slug = getPostSlug(post);
-  return `/${slug}`;
+  return `/${getPostSlug(post)}`;
 }
 
 // ── Series ─────────────────────────────────────────────────────────────────────
 
 /**
- * Posts in a series — searches both collections, sorted by order ascending.
- * Series can span travel and tech (e.g. a homelab series under tech).
+ * Posts belonging to a series, sorted by seriesOrder ascending.
  */
 export async function getSeriesPosts(series: string): Promise<Post[]> {
   const all = await getAllPosts();
@@ -130,11 +113,10 @@ export async function getSeriesPosts(series: string): Promise<Post[]> {
     .sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0));
 }
 
-
 // ── Related posts ──────────────────────────────────────────────────────────────
 
 /**
- * Related posts — scored by countries + collection + tag overlap.
+ * Related posts scored by countries + tag overlap.
  *
  * Scoring:
  *   shared country + shared tag  → 4
@@ -149,16 +131,12 @@ export function getRelatedPosts(
 ): Post[] {
   const currentTags      = current.data.tags ?? [];
   const currentCol       = current.collection;
-  const currentCountries = current.collection === 'posts'
-    ? getCountryIds(current as Post)
-    : [];
+  const currentCountries = getCountryIds(current);
 
   const scored = allPosts
-    .filter((p) => p.id !== current.id || p.collection !== current.collection)
+    .filter((p) => p.id !== current.id)
     .map((post) => {
-      const postCountries = post.collection === 'posts'
-        ? getCountryIds(post as Post)
-        : [];
+      const postCountries = getCountryIds(post);
       const sharedCountry =
         currentCountries.length > 0 &&
         postCountries.some((id) => currentCountries.includes(id));
@@ -168,10 +146,10 @@ export function getRelatedPosts(
       );
 
       let score = 0;
-      if (sharedCountry && sharedTag)    score = 4;
+      if (sharedCountry && sharedTag)       score = 4;
       else if (sameCollection && sharedTag) score = 3;
-      else if (sameCollection)           score = 2;
-      else if (sharedTag)                score = 1;
+      else if (sameCollection)              score = 2;
+      else if (sharedTag)                   score = 1;
 
       return { post, score };
     })
@@ -188,8 +166,8 @@ export function getRelatedPosts(
     const recent = allPosts
       .filter(
         (p) =>
-          (p.id !== current.id || p.collection !== current.collection) &&
-          !scored.find((r) => r.id === p.id && r.collection === p.collection)
+          p.id !== current.id &&
+          !scored.find((r) => r.id === p.id)
       )
       .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf())
       .slice(0, count - scored.length);
@@ -200,21 +178,16 @@ export function getRelatedPosts(
   return scored;
 }
 
-// ── Tag Queries ───────────────────────────────────────────────────────────────
+// ── Tag queries ────────────────────────────────────────────────────────────────
 
 function buildTagList(posts: Post[]): TagInfo[] {
   const map = new Map<string, TagInfo>();
-
   const normalize = (t: string) => t.trim().toLowerCase();
 
   for (const post of posts) {
     for (const raw of post.data.tags ?? []) {
       const key = normalize(raw);
-
-      if (!map.has(key)) {
-        map.set(key, { key, label: raw, count: 0 });
-      }
-
+      if (!map.has(key)) map.set(key, { key, label: raw, count: 0 });
       map.get(key)!.count++;
     }
   }
@@ -224,13 +197,36 @@ function buildTagList(posts: Post[]): TagInfo[] {
   );
 }
 
-async function getTagsFrom(source: () => Promise<Post[]>) {
-  return buildTagList(await source());
+// 3.2: Removed getTagsFrom wrapper — getAllTags calls buildTagList directly.
+export async function getAllTags(): Promise<TagInfo[]> {
+  return buildTagList(await getAllPosts());
 }
 
-export const getAllTags    = () => getTagsFrom(getAllPosts);
-
+// ── Filter dimension helpers ───────────────────────────────────────────────────
 
 export const getDistinctYears = (posts: Post[]): number[] =>
-  [...new Set(posts.map(p => p.data.published.getFullYear()))]
-    .sort((a, b) => b - a);
+  [...new Set(posts.map((p) => p.data.published.getFullYear()))].sort(
+    (a, b) => b - a
+  );
+
+/**
+ * Distinct theme values across all posts, sorted alphabetically.
+ */
+export function getDistinctThemes(posts: Post[]): string[] {
+  const set = new Set<string>();
+  for (const post of posts) {
+    for (const t of post.data.theme ?? []) set.add(t.trim());
+  }
+  return [...set].sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * Distinct country display names across all posts, sorted alphabetically.
+ */
+export function getDistinctCountries(posts: Post[]): string[] {
+  const set = new Set<string>();
+  for (const post of posts) {
+    for (const c of post.data.countries ?? []) set.add(c.trim());
+  }
+  return [...set].sort((a, b) => a.localeCompare(b));
+}

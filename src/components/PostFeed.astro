@@ -18,26 +18,18 @@ import PostCard from "./PostCard.astro";
 
 interface Props {
   posts: Post[];
-
   sectionTitle?: string;
   sectionDesc?: string;
-
   variant?: "archive" | "compact" | "card";
-
   enableFilter?: boolean;
-  listId?: string;
 }
 
 const {
   posts,
-
   sectionTitle,
   sectionDesc,
-
   variant = "compact",
-
   enableFilter = false,
-  listId = "post-feed",
 } = Astro.props;
 
 const isArchive = variant === "archive";
@@ -47,7 +39,7 @@ const groupedEntries = isArchive
   ? getPostsGroupedByYear(posts)
   : [];
 ---
-<section id={listId} class="post-feed mb-8">
+<section id="post-feed" class="post-feed mb-8">
   <SectionHeader
     title={sectionTitle}
     subheading={sectionDesc}

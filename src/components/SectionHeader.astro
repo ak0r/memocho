@@ -10,7 +10,7 @@ const { title, subheading } = Astro.props;
 <div class="section-header flex flex-col gap-2 mb-4 py-2">
   <h2 class="section-header-title text-muted text-xl uppercase font-sans tracking-widest m-0">{title}</h2>
   {subheading && (
-    <p class="section-header-subheading ext-sm text-ink-faded">{subheading}</p>
+    <p class="section-header-subheading text-sm text-muted">{subheading}</p>
   )}
   {Astro.slots.has('meta') && (
     <div class="section-header-meta">
