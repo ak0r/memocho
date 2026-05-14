@@ -35,7 +35,7 @@ export const siteConfig: SiteConfig = {
   social: [
     {
       title: "GitHub",
-      url: "https://github.com/ak0r/memocho",
+      url: "https://github.com/ak0r",
       icon: "github",
     },
     {

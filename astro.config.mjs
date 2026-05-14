@@ -7,18 +7,15 @@ import tailwindcss from '@tailwindcss/vite';
 import { siteConfig } from './src/site.config.ts';
 
 import sitemap from "@astrojs/sitemap";
-
 import expressiveCode from "astro-expressive-code";
-
 import mdx from "@astrojs/mdx";
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://memocho.amitkul.in',
+  site: 'https://amitkul.in',
 
   image: {
     responsiveStyles: true,
-    // layout: "constrained"
   },
 
   experimental: {
@@ -32,16 +29,9 @@ export default defineConfig({
   security: {
     contentSecurityPolicy: {
       directives: {
-        // 'self' covers same-origin scripts including /pagefind/pagefind-ui.js
-        // Astro auto-nonces is:inline scripts when CSP is enabled
-        // Cloudflare Web Analytics beacon scrip
         "script-src": ["'self'", "https://static.cloudflareinsights.com"],
-        // 'unsafe-inline' needed for Pagefind UI's dynamically injected result styles
-        "style-src": ["'self'", "'unsafe-inline'"],
-        // Pagefind fetches the search index via XHR
-        // Cloudflare Analytics reports back to cloudflareinsights.com
-        "connect-src": ["'self'", "https://cloudflareinsights.com"],
-        // Pagefind uses a Web Worker for indexing
+        "style-src":  ["'self'", "'unsafe-inline'"],
+        "connect-src":["'self'", "https://cloudflareinsights.com"],
         "worker-src": ["'self'", "blob:"],
       },
     },
@@ -79,7 +69,7 @@ export default defineConfig({
   ],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
   },
 
   markdown: {
@@ -91,25 +81,34 @@ export default defineConfig({
   },
 
   integrations: [
-    // Expressive Code must come before MDX
     expressiveCode({
-      // Matches your data-theme attribute toggle
       themes: ['everforest-dark', 'everforest-light'],
-      themeCssSelector: (theme) => 
+      themeCssSelector: (theme) =>
         theme.name === 'everforest-dark' ? '[data-theme="dark"]' : '[data-theme="light"]',
     }),
-    mdx(), 
+    mdx(),
     sitemap({
+      // Exclude OG image routes — not content pages
+      filter: (page) => !page.includes('/og/'),
+
       serialize(item) {
         const base = siteConfig.url.replace(/\/$/, '');
 
-        if (item.url === base + '/')                                     return { ...item, priority: 1.0 };
-        if (/\/(travel|tech|destinations)\/$/.test(item.url))            return { ...item, priority: 0.9 };
-        if (/\/destinations\/[^/]+\/$/.test(item.url))                   return { ...item, priority: 0.8 };
-        if (/\/(travel|tech)\/[^/]+\/$/.test(item.url))                  return { ...item, priority: 0.7 };
-        if (/\/(about|search)\/$/.test(item.url))                        return { ...item, priority: 0.5 };
-        return { ...item, priority: 0.3 };
+        // Home
+        if (item.url === base + '/')
+          return { ...item, priority: 1.0, changefreq: 'weekly' };
+
+        // Archive listing
+        if (item.url === base + '/archive/')
+          return { ...item, priority: 0.9, changefreq: 'weekly' };
+
+        // Static pages
+        if (/\/(about|now|uses|search)\/$/.test(item.url))
+          return { ...item, priority: 0.5, changefreq: 'monthly' };
+
+        // Individual posts — everything else at root slug level
+        return { ...item, priority: 0.7, changefreq: 'monthly' };
       },
-    })
+    }),
   ],
 });
