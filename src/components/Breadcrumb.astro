@@ -26,10 +26,10 @@ const crumbs = buildCrumbs(pathname, label);
         return (
           <li
             key={crumb.href}
-            class="breadcrumb__item flex items-center gap-1 text-sm whitespace-nowrap"
+            class="breadcrumb__item flex min-w-0 items-center gap-1 text-sm"
           >
             {isLast ? (
-              <span class="text-content" aria-current="page">
+              <span class="min-w-0 truncate text-content" aria-current="page">
                 {crumb.title}
               </span>
             ) : (

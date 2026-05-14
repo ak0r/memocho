@@ -13,6 +13,7 @@ import type { Post } from "@/utils/content.utils";
 import { formatDate, titleify } from "@/utils/text.utils";
 import { getCoverImage } from '@/utils/image.utils';
 import ImageWrapper from '@/components/ImageWrapper.astro';
+import Icon from "@/components/Icon.astro";
 
 interface Props {
   post: Post;
@@ -107,7 +108,7 @@ const coverImage = getCoverImage(cover);
         class="animate-move translate-x-1 opacity-0 text-minimal group-hover:translate-x-0 group-hover:opacity-100"
         aria-hidden="true"
       >
-        →
+        <Icon name="arrow-right" size={16} />
       </span>
 
     </div>

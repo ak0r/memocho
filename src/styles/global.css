@@ -14,5 +14,9 @@
   body {
     @apply bg-page text-content;
     font-family: var(--font-primary);
+    /* overflow-x: clip; */
   }
+  :focus-visible {
+    @apply outline-2 outline-brand outline-offset-2 rounded-sm;
+  } 
 }

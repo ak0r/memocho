@@ -40,7 +40,7 @@ const sortedSeries = isSeries
             {sortedSeries.findIndex(p => p.id === current.id) + 1} / {sortedSeries.length}
           </span>
           <span class="ml-1 text-minimal text-xs transition-transform group-open:rotate-180">
-            ▾
+            <Icon name="chevron-down" size={16} />
           </span>
         </summary>
 
@@ -97,7 +97,10 @@ const sortedSeries = isSeries
         href={getPostUrl(prev)}
         class="group card flex flex-1 flex-col gap-1 no-underline"
       >
-        <span class="text-minimal">← Previous post</span>
+        <div class="flex gap-2 items-center justify-start">
+          <Icon name="arrow-left" size={16} class="text-minimal"/>
+          <span class="text-minimal">Previous post</span>
+        </div>
         <span class="text-content animate">
           {prev.data.title}
         </span>
@@ -109,7 +112,10 @@ const sortedSeries = isSeries
         href={getPostUrl(next)}
         class="group card flex flex-1 flex-col gap-1 text-right no-underline"
       >
-        <span class="text-minimal">Next post →</span>
+        <div class="flex gap-2 items-center justify-end">
+          <span class="text-minimal">Next post</span>
+          <Icon name="arrow-right" size={16} class="text-minimal"/>
+        </div>
         <span class="text-content animate">
           {next.data.title}
         </span>

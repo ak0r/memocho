@@ -13,7 +13,7 @@ function isActive(href: string): boolean {
 <header class="site-header sticky top-0 z-50 isolate bg-page border-b border-border w-full md:py-2 mb-8">
   <div class="wrap">
     <div class="flex items-center justify-between py-3 gap-4">
-      <a href="/" aria-label={`${siteConfig.title} home`} class="site-logo no-underline text-muted shrink-0 flex justify-start hover:text-content!">
+      <a href="/" aria-label={`${siteConfig.title} home`} class="site-logo no-underline text-muted flex min-w-0 overflow-hidden hover:text-content!">
         {siteConfig.logo ? (
           <Logo />
         ) : (
@@ -37,38 +37,27 @@ function isActive(href: string): boolean {
       </div>
 
       <!-- Theme toggle + hamburger (grouped right) -->
-      <div class="flex items-center gap-3">
-        <pagefind-modal-trigger compact hide-shortcut>
-        </pagefind-modal-trigger>
+      <div class="flex items-baseline content-center gap-3">
+        <div class="hidden md:block items-center"> 
+          <pagefind-modal-trigger compact></pagefind-modal-trigger>
+        </div>
         <button
           id="theme-toggle"
-          class="btn btn--ghost btn--icon"
+          class="rounded-md border-border border p-2 hover:bg-surface cursor-pointer"
           aria-label="Toggle theme"
           title="Toggle light/dark theme"
         >
         <Icon name="sun" size={20} class="hidden icon icon-sun text-muted animate"/>
         <Icon name="moon" size={20} class="block icon icon-moon text-muted animate"/>
-        <!-- <svg class="icon-sun hidden text-muted" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4"/>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-        </svg>
-        <svg class="icon-moon block" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-        </svg> -->
         </button>
 
         <button
           id="nav-toggle"
-          class="md:hidden btn btn--ghost btn--icon"
+          class="md:hidden rounded-md border-border border p-2 hover:bg-surface cursor-pointer"
           aria-label="Toggle menu"
           aria-expanded="false"
           aria-controls="nav-mobile"
         >
-          <!-- <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="4" x2="20" y1="6" y2="6"/>
-            <line x1="4" x2="20" y1="12" y2="12"/>
-            <line x1="4" x2="20" y1="18" y2="18"/>
-          </svg> -->
           <Icon name="menu" size={20} class="icon icon-menu text-muted block animate" />
           <Icon name="x" size={20} class="icon icon-close text-muted hidden animate" />
         </button>
@@ -88,6 +77,7 @@ function isActive(href: string): boolean {
           {item.title}
         </a>
       ))}
+      <pagefind-modal-trigger></pagefind-modal-trigger>
     </div>
   </div>
 </header>

@@ -26,6 +26,13 @@ const {
   quality = 80,
 } = Astro.props;
 
+const imageClass = [
+  "block w-full h-auto",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
 const isAstroImage = (src: unknown): src is ImageMetadata =>
   typeof src === 'object' && src !== null && 'src' in src;
 ---
@@ -41,10 +48,10 @@ const isAstroImage = (src: unknown): src is ImageMetadata =>
       decoding="async"
       formats={['avif', 'webp']}
       quality={quality}
-      class={className}
+      class={imageClass}
     />
   ) : (
-    <img src={src} alt={alt} loading={loading} class={className} />
+    <img src={src} alt={alt} loading={loading} class={imageClass} />
   )
 )}
 
@@ -63,7 +70,7 @@ const isAstroImage = (src: unknown): src is ImageMetadata =>
         class={className}
       />
     ) : (
-      <img src={src} alt={alt} loading={loading} class={className} />
+      <img src={src} alt={alt} loading={loading} class={imageClass} />
     )}
     {caption && (
       <figcaption class="post-figure__caption">{caption}</figcaption>
