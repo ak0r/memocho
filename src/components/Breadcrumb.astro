@@ -1,6 +1,6 @@
 ---
 import { buildCrumbs } from '@/utils/breadcrumb.utils';
-// import SchemaOrg from '@/components/SchemaOrg.astro';
+import SchemaOrg from '@/components/SchemaOrg.astro';
 
 interface Props {
   label?: string;
@@ -11,6 +11,12 @@ const pathname = Astro.url.pathname;
 const crumbs = buildCrumbs(pathname, label);
 ---
 {crumbs.length > 1 && (
+
+  <SchemaOrg
+    type="breadcrumb"
+    crumbs={crumbs}
+  />
+
   <nav class="breadcrumb mb-6 md:mb-8" aria-label="Breadcrumb">
     <ol class="breadcrumb__list flex items-center font-mono flex-wrap gap-1 p-0 m-0 list-none">
 

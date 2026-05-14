@@ -47,7 +47,7 @@ const seriesPosts   = series ? await getSeriesPosts(series) : [];
 const readTime      = calculateReadingTime(entry.body ?? "").text;
 const coverImage    = getCoverImage(cover);
 const galleryImages = getGalleryImages(entry.filePath ?? '');
-const ogImage       = `/og/posts/${getPostSlug(entry)}.png`;
+const ogImage       = `/og/${entry.collection}/${getPostSlug(entry)}.png`;
 
 const currentIndex = allPosts.findIndex(
   (p) => p.id === entry.id && p.collection === entry.collection
@@ -67,6 +67,13 @@ const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : n
     {tags}
     {ogImage}
   />
+
+  <SchemaOrg
+    type="article"
+    entry={entry}
+    slot="seo"
+  />
+  
   <Fragment slot="header">
     <div class="flex flex-col gap-8">
 

@@ -2,125 +2,262 @@
 /**
  * SchemaOrg.astro
  *
- * Renders JSON-LD structured data for search engine rich results.
- * Place in <head> via the `seo` slot in BaseLayout.
+ * Minimal JSON-LD structured data.
  *
- * Supported types:
- *   - 'article'    → BlogPosting — use in BlogLayout
- *   - 'breadcrumb' → BreadcrumbList — use in Breadcrumb.astro
- *   - 'website'    → WebSite + SearchAction — use on homepage
- *
- * Usage:
- *   <SchemaOrg type="article" {entry} slot="seo" />
- *   <SchemaOrg type="breadcrumb" crumbs={crumbs} />
- *   <SchemaOrg type="website" slot="seo" />
+ * Supported:
+ * - article
+ * - breadcrumb
+ * - website
  */
 
-import type { CollectionEntry } from 'astro:content';
-import { siteConfig } from '@/site.config';
-import type { Crumb } from '@/utils/breadcrumb.utils';
-import { getPostUrl } from '@/utils/content.utils';
+import type { CollectionEntry } from "astro:content";
 
-type SchemaType = 'article' | 'breadcrumb' | 'website';
+import { siteConfig } from "@/site.config";
+
+import type { Crumb } from "@/utils/breadcrumb.utils";
+import { getPostUrl } from "@/utils/content.utils";
+
+/* ============================================================================
+   TYPES
+============================================================================ */
+
+type ContentEntry =
+  | CollectionEntry<"travels">
+  | CollectionEntry<"tech">;
+
+type SchemaType =
+  | "article"
+  | "breadcrumb"
+  | "website";
 
 interface Props {
   type: SchemaType;
+
   // article
-  entry?: CollectionEntry<'posts'>;
+  entry?: ContentEntry;
+
   // breadcrumb
   crumbs?: Crumb[];
 }
 
-const { type, entry, crumbs } = Astro.props;
+const {
+  type,
+  entry,
+  crumbs,
+} = Astro.props;
 
-const siteUrl = siteConfig.url.replace(/\/$/, '');
+/* ============================================================================
+   GLOBALS
+============================================================================ */
 
-// ── Person — reused across article and website ───────────────────────────────
+const siteUrl = siteConfig.url.replace(/\/$/, "");
+
+/* ============================================================================
+   ENTITIES
+============================================================================ */
 
 const person = {
-  '@type': 'Person',
+  "@type": "Person",
+  "@id": `${siteUrl}/#author`,
+
   name: siteConfig.author,
   url: siteUrl,
 };
 
-// ── Schema builders ──────────────────────────────────────────────────────────
+const publisher = {
+  "@type": "Organization",
+  "@id": `${siteUrl}/#organization`,
 
-function buildArticle(entry: CollectionEntry<'posts'>) {
-  const { title, description, published, updated, cover, tags, lang } = entry.data;
-  const canonicalUrl = new URL(getPostUrl(entry), siteUrl).href;
+  name: siteConfig.title,
+  url: siteUrl,
+};
+
+/* ============================================================================
+   HELPERS
+============================================================================ */
+
+function getCollectionLabel(collection: string) {
+
+  switch (collection) {
+
+    case "travels":
+      return "Travel";
+
+    case "tech":
+      return "Tech";
+
+    default:
+      return undefined;
+  }
+}
+
+/* ============================================================================
+   SCHEMA BUILDERS
+============================================================================ */
+
+function buildArticle(entry: ContentEntry) {
+
+  const {
+    title,
+    description,
+    published,
+    updated,
+    cover,
+    tags,
+    lang,
+  } = entry.data;
+
+  const canonicalUrl =
+    new URL(getPostUrl(entry), siteUrl).href;
+
   const imageUrl = cover
     ? new URL(cover, siteUrl).href
-    : new URL('/og/default.png', siteUrl).href;
+    : new URL("/og/default.png", siteUrl).href;
+
+  const section =
+    getCollectionLabel(entry.collection);
 
   return {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
+    "@context": "https://schema.org",
+
+    "@type": "BlogPosting",
+
     headline: title,
-    ...(description && { description }),
-    datePublished: published.toISOString(),
-    dateModified:  (updated ?? published).toISOString(),
+
+    ...(description && {
+      description,
+    }),
+
     url: canonicalUrl,
+
     image: imageUrl,
-    inLanguage: lang ?? 'en',
-    ...(tags?.length && { keywords: tags.join(', ') }),
+
+    inLanguage: lang ?? "en",
+
+    datePublished: published.toISOString(),
+
+    dateModified:
+      (updated ?? published).toISOString(),
+
+    ...(tags?.length && {
+      keywords: tags.join(", "),
+    }),
+
+    ...(section && {
+      articleSection: section,
+    }),
+
     author: person,
-    publisher: person,
+
+    publisher,
+
     mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': canonicalUrl,
+      "@type": "WebPage",
+      "@id": canonicalUrl,
     },
   };
 }
 
 function buildBreadcrumb(crumbs: Crumb[]) {
+
   return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
+    "@context": "https://schema.org",
+
+    "@type": "BreadcrumbList",
+
     itemListElement: crumbs.map((crumb, index) => {
-      const isLast = index === crumbs.length - 1;
+
+      const isLast =
+        index === crumbs.length - 1;
+
       return {
-        '@type': 'ListItem',
+        "@type": "ListItem",
+
         position: index + 1,
+
         name: crumb.title,
-        // Omit `item` on the last crumb — current page per Google spec
-        ...(!isLast && { item: new URL(crumb.href, siteUrl).href }),
+
+        // Google recommends omitting item on current page
+        ...(!isLast && {
+          item: new URL(
+            crumb.href,
+            siteUrl
+          ).href,
+        }),
       };
     }),
   };
 }
 
 function buildWebsite() {
+
   return {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
+    "@context": "https://schema.org",
+
+    "@type": "WebSite",
+
+    "@id": `${siteUrl}/#website`,
+
     name: siteConfig.title,
+
     description: siteConfig.description,
+
     url: siteUrl,
-    author: person,
+
+    publisher,
+
     potentialAction: {
-      '@type': 'SearchAction',
+      "@type": "SearchAction",
+
       target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+        "@type": "EntryPoint",
+
+        urlTemplate:
+          `${siteUrl}/search?q={search_term_string}`,
       },
-      'query-input': 'required name=search_term_string',
+
+      "query-input":
+        "required name=search_term_string",
     },
   };
 }
 
-// ── Resolve schema ───────────────────────────────────────────────────────────
+/* ============================================================================
+   RESOLVE SCHEMA
+============================================================================ */
 
-let schema: Record<string, unknown> | null = null;
+let schema:
+  | Record<string, unknown>
+  | null = null;
 
-if (type === 'article' && entry) {
+if (
+  type === "article" &&
+  entry
+) {
+
   schema = buildArticle(entry);
-} else if (type === 'breadcrumb' && crumbs && crumbs.length > 1) {
+
+} else if (
+  type === "breadcrumb" &&
+  crumbs &&
+  crumbs.length > 1
+) {
+
   schema = buildBreadcrumb(crumbs);
-} else if (type === 'website') {
+
+} else if (
+  type === "website"
+) {
+
   schema = buildWebsite();
 }
 ---
 
-{schema && (
-  <script type="application/ld+json" set:html={JSON.stringify(schema, null, 2)} />
-)}
+{
+  schema && (
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(schema, null, 2)}
+    />
+  )
+}

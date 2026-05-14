@@ -4,10 +4,16 @@ import remarkCallouts from './src/utils/remark-callouts';
 import { remarkObsidianCore } from './src/utils/remark-obsidian-core';
 import { remarkImageProcessing } from './src/utils/remark-image-processing';
 import tailwindcss from '@tailwindcss/vite';
+import { siteConfig } from './src/site.config.ts';
+
+import sitemap from "@astrojs/sitemap";
+
+import expressiveCode from "astro-expressive-code";
+
+import mdx from "@astrojs/mdx";
 
 // https://astro.build/config
 export default defineConfig({
-
   site: 'https://memocho.amitkul.in',
 
   image: {
@@ -83,4 +89,27 @@ export default defineConfig({
       remarkCallouts,
     ],
   },
+
+  integrations: [
+    // Expressive Code must come before MDX
+    expressiveCode({
+      // Matches your data-theme attribute toggle
+      themes: ['everforest-dark', 'everforest-light'],
+      themeCssSelector: (theme) => 
+        theme.name === 'everforest-dark' ? '[data-theme="dark"]' : '[data-theme="light"]',
+    }),
+    mdx(), 
+    sitemap({
+      serialize(item) {
+        const base = siteConfig.url.replace(/\/$/, '');
+
+        if (item.url === base + '/')                                     return { ...item, priority: 1.0 };
+        if (/\/(travel|tech|destinations)\/$/.test(item.url))            return { ...item, priority: 0.9 };
+        if (/\/destinations\/[^/]+\/$/.test(item.url))                   return { ...item, priority: 0.8 };
+        if (/\/(travel|tech)\/[^/]+\/$/.test(item.url))                  return { ...item, priority: 0.7 };
+        if (/\/(about|search)\/$/.test(item.url))                        return { ...item, priority: 0.5 };
+        return { ...item, priority: 0.3 };
+      },
+    })
+  ],
 });
