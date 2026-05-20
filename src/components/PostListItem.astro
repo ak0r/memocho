@@ -18,7 +18,7 @@ const normalize = (v?: string) => v?.toLowerCase();
   class="group flex flex-col gap-1 py-3 px-2 -mx-2 mb-1 rounded-md transition hover:bg-surface/70
     md:flex-row md:items-center md:gap-4 md:py-2"
   data-year={enableFilter ? post.data.published.getFullYear() : undefined}
-  data-type={enableFilter ? normalize(post.data.type) : undefined}
+  data-category={enableFilter ? normalize(post.data.category) : undefined}
   data-tags={enableFilter ? JSON.stringify((post.data.tags ?? []).map(normalize)) : undefined}
   data-destination={enableFilter ? JSON.stringify(getCountryIds(post).map(normalize)) : undefined}
   data-theme={enableFilter ? JSON.stringify((post.data.theme ?? []).map(normalize)) : undefined}

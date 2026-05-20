@@ -12,6 +12,7 @@
 import type { Post } from "@/utils/content.utils";
 import { formatDate, titleify } from "@/utils/text.utils";
 import { getCoverImage } from '@/utils/image.utils';
+import { getPostSlug } from "@/utils/content.utils";
 import ImageWrapper from '@/components/ImageWrapper.astro';
 import Icon from "@/components/Icon.astro";
 
@@ -20,7 +21,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const href = `/${post.id}`;
+const href = getPostSlug(post);
 
 const {
   title,

@@ -105,14 +105,57 @@ function vaultPathToGlobKey(vaultPath: string): string {
  *
  * Returns undefined if the path cannot be resolved (allows graceful fallback).
  */
-export function getCoverImage(raw: string | undefined): ImageMetadata | undefined {
+// export function getCoverImage(raw: string | undefined): ImageMetadata | undefined {
+//   if (!raw) return undefined;
+
+//   const stripped = stripObsidianBrackets(raw).trim();
+//   if (!stripped) return undefined;
+
+//   const globKey = vaultPathToGlobKey(stripped);
+
+//   const mod = allAttachmentImages[globKey];
+//   return mod?.default;
+// }
+
+export function normalizeCoverPath(
+  raw: string | undefined
+): string | undefined {
+
   if (!raw) return undefined;
 
-  const stripped = stripObsidianBrackets(raw).trim();
-  if (!stripped) return undefined;
+  const value = raw.trim();
 
-  const globKey = vaultPathToGlobKey(stripped);
+  // Obsidian wiki-link
+  // [[image.jpg]]
 
+  const obsidian = value.match(/^\[\[(.+?)\]\]$/);
+
+  if (obsidian) {
+    return obsidian[1].trim();
+  }
+
+  // Markdown link
+  // [Label](path/image.jpg)
+
+  const markdown = value.match(/^\[.*?\]\((.+?)\)$/);
+
+  if (markdown) {
+    return markdown[1].trim();
+  }
+
+  // Raw path fallback
+
+  return value;
+}
+
+export function getCoverImage(
+  raw: string | undefined
+): ImageMetadata | undefined {
+
+  const normalized = normalizeCoverPath(raw);
+
+  if (!normalized) return undefined;
+  const globKey = vaultPathToGlobKey(normalized);
   const mod = allAttachmentImages[globKey];
   return mod?.default;
 }

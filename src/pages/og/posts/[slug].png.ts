@@ -10,7 +10,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     props: {
       title:       entry.data.title,
       description: entry.data.description ?? '',
-      label:       entry.data.theme?.[0] ?? entry.data.type ?? '',
+      label:       entry.data.theme?.[0] ?? entry.data.category ?? '',
       tags:        entry.data.tags ?? [],
       date:        entry.data.published.toLocaleDateString('en-US', {
         year:  'numeric',

@@ -15,13 +15,13 @@
     "sync-content": "git submodule update --init --remote src/content && echo '✅ Content synced'"
   },
   "dependencies": {
-    "@astrojs/compiler-rs": "^0.1.10",
-    "@astrojs/mdx": "^5.0.4",
+    "@astrojs/compiler-rs": "^0.2.0",
+    "@astrojs/mdx": "^5.0.6",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
     "@tailwindcss/vite": "^4.2.4",
     "@vercel/og": "^0.11.1",
-    "astro": "^6.1.10",
+    "astro": "^6.3.3",
     "astro-expressive-code": "^0.42.0",
     "glightbox": "^3.3.1",
     "mdast": "^0.26.2",

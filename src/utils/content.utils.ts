@@ -204,6 +204,26 @@ export async function getAllTags(): Promise<TagInfo[]> {
 
 // ── Filter dimension helpers ───────────────────────────────────────────────────
 
+/**
+ * Distinct category values across all posts, sorted alphabetically.
+ */
+export function getDistinctCategories(posts: Post[]): string[] {
+  const set = new Set<string>();
+
+  for (const post of posts) {
+    const category = post.data.category;
+
+    if (category) {
+      set.add(category.trim());
+    }
+  }
+
+  return [...set].sort((a, b) =>
+    a.localeCompare(b)
+  );
+}
+
+
 export const getDistinctYears = (posts: Post[]): number[] =>
   [...new Set(posts.map((p) => p.data.published.getFullYear()))].sort(
     (a, b) => b - a

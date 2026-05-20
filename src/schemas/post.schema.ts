@@ -4,7 +4,7 @@ import { baseSchema } from "./base.schema";
 export const postSchema =
   baseSchema.extend({
 
-    type: z.string().optional(), // travel, tech, thoughts anything
+    category: z.string().optional(), // travels, tech, thoughts anything
     theme: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional(),
     cover: z.string().optional(),
