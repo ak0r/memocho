@@ -93,10 +93,10 @@ export function remarkObsidianCore() {
         } else if (targetPage.includes('#')) {
           // Cross-page anchor
           const [page, anchor] = targetPage.split('#');
-          url = `/${slugify(page)}#${slugify(anchor)}`;
+          url = `/posts/${slugify(page)}#${slugify(anchor)}`;
         } else {
           // Standard post link
-          url = `/${slugify(targetPage)}`;
+          url = `/posts/${slugify(targetPage)}`;
         }
 
         wikilinkMatches.push({
