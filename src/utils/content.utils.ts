@@ -90,16 +90,16 @@ export function getCountryIds(post: Post): string[] {
  * "2026-01-26-self-hosting/replacing-google-photos" → "replacing-google-photos"
  * "rajgad-trek" → "rajgad-trek"
  */
-export function getPostSlug(post: Post): string {
-  return post.id.includes("/") ? post.id.split("/").pop()! : post.id;
-}
+// export function getPostSlug(post: Post): string {
+//   return post.id.includes("/") ? post.id.split("/").pop()! : post.id;
+// }
 
 /**
  * Canonical URL for any post.
  */
-export function getPostUrl(post: Post): string {
-  return `/${getPostSlug(post)}`;
-}
+// export function getPostUrl(post: Post): string {
+//   return `/${getPostSlug(post)}`;
+// }
 
 // ── Series ─────────────────────────────────────────────────────────────────────
 
@@ -249,4 +249,66 @@ export function getDistinctCountries(posts: Post[]): string[] {
     for (const c of post.data.countries ?? []) set.add(c.trim());
   }
   return [...set].sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * Extract clean slug from post id.
+ *
+ * Example:
+ * posts/travels/2022-08-15-udaipur-travel-guide/index.md
+ * → udaipur-travel-guide
+ */
+export function getPostSlug(
+  post: Post
+): string {
+
+  // Explicit slug override
+
+  if (post.slug) {
+    return post.slug;
+  }
+
+  const parts =
+    post.id.split('/');
+
+  // Folder-style content:
+  // xxx/index.md
+
+  if (
+    parts[parts.length - 1] === 'index.md'
+  ) {
+
+    const folder =
+      parts[parts.length - 2];
+
+    if (folder) {
+
+      return folder.replace(
+        /^\d{4}-\d{2}-\d{2}-/,
+        ''
+      );
+    }
+  }
+
+  // File-style content:
+  // xxx.md
+
+  const filename =
+    parts[parts.length - 1];
+
+  return filename.replace(
+    /\.md$/,
+    ''
+  );
+}
+
+/**
+ * Canonical public URL for post.
+ */
+
+export function getPostUrl(
+  post: Post
+): string {
+
+  return `/${getPostSlug(post)}`;
 }

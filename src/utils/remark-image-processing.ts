@@ -51,8 +51,7 @@ function resolveImagePaths(tree: Root, file: any) {
       if (contentIndex !== -1) {
         const contentRoot = normalizedPath
           .slice(contentIndex + '/src/content/'.length)
-          .replace(/\/index\.md$/, '')
-          .replace(/\.md$/, '');
+          .replace(/\/[^/]+\.md$/, '');
 
         // contentRoot = posts/forts-of-sahyadri/rajgad  or  pages/about
 

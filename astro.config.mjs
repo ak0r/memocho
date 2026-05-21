@@ -1,12 +1,11 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 import remarkCallouts from './src/utils/remark-callouts';
-import { remarkObsidianCore } from './src/utils/remark-obsidian-core';
 import { remarkImageProcessing } from './src/utils/remark-image-processing';
 import { remarkExternalLinks } from './src/utils/remark-external-links.ts';
+import { remarkObsidian } from './src/utils/remark-obsidian.ts';
 import tailwindcss from '@tailwindcss/vite';
 import { siteConfig } from './src/site.config.ts';
-
 import sitemap from "@astrojs/sitemap";
 import expressiveCode from "astro-expressive-code";
 import mdx from "@astrojs/mdx";
@@ -70,12 +69,19 @@ export default defineConfig({
   ],
 
   vite: {
+    server: {
+      watch: {
+        ignored: ['**/.obsidian/**', '**/_bases/**', '**/bases/**', '**/_home/**', '**/home/**', '**/_base/**', '**/base/**']
+      }
+    },
+    assetsInclude: ['**/*.base', '**/.obsidian/**', '**/_bases/**'],
     plugins: [tailwindcss()],
   },
 
   markdown: {
     remarkPlugins: [
-      remarkObsidianCore,
+      // remarkObsidianCore,
+      remarkObsidian,
       remarkExternalLinks,
       remarkImageProcessing,
       remarkCallouts,
