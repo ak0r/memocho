@@ -5,6 +5,9 @@ on:
     types: [vault-sync]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   receive:
     runs-on: ubuntu-latest
@@ -28,5 +31,6 @@ jobs:
           git config user.name "vault-sync[bot]"
           git config user.email "vault-sync@users.noreply.github.com"
           git add src/content
-          git commit -m "[sync] update content submodule" || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -m "[sync] update content submodule"
           git push
